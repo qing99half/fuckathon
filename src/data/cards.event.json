@@ -1,0 +1,163 @@
+[
+  {
+    "id": "E01", "phase": "prep", "prob": 0.4, "title": "上届冠军来打听",
+    "body": "上届冠军在群里问：“今年的题目，是不是又提前定了？”",
+    "options": [
+      { "id": "a", "label": "回复“公平公正公开”", "preview": "口碑 -2", "effects": { "rep": -2 } },
+      { "id": "b", "label": "私聊安抚：“今年真不一样”", "preview": "口碑 -1", "effects": { "rep": -1 } },
+      { "id": "c", "label": "踢出群聊", "preview": "声量 +5", "effects": { "buzz": 5, "risk": 10 }, "footnote": "他把聊天记录截图发小红书了。" }
+    ]
+  },
+  {
+    "id": "E02", "phase": "prep", "prob": 0.3, "probPlusIfTier3": 0.2, "title": "同行撞期",
+    "body": "同城另一场黑客松定档同一天，对方 Title 比你的还长两个字。",
+    "options": [
+      { "id": "a", "label": "提前一周开赛", "preview": "赞助金额 -20% · 声量 +5", "effects": { "buzz": 5 }, "setFlags": { "sponsorCut": 0.8 } },
+      { "id": "b", "label": "正面硬刚", "preview": "——", "effects": { "anger": 5 }, "footnote": "选手两边都报名，看盒饭决定去哪家。" },
+      { "id": "c", "label": "把 Title 加长反超", "preview": "声量 +8 · 口碑 -3", "effects": { "buzz": 8, "rep": -3, "expect": 10 }, "footnote": "你的 Title 现在一行放不下。" }
+    ]
+  },
+  {
+    "id": "E03", "phase": "prep", "prob": 1, "title": "通稿的诱惑",
+    "body": "自媒体报价 5000：预计参赛人数可以写成 500，配图有现成的“气氛组”素材库。",
+    "options": [
+      { "id": "a", "label": "写 500 人", "cost": 5000, "preview": "预算 -5000 · 声量 +15", "effects": { "money": -5000, "buzz": 15, "expect": 30 }, "footnote": "10w+ 达成。" },
+      { "id": "b", "label": "写 100 人", "cost": 5000, "preview": "预算 -5000 · 声量 +5", "effects": { "money": -5000, "buzz": 5, "expect": 10 } },
+      { "id": "c", "label": "老实写 40 人", "preview": "声量 +1", "effects": { "buzz": 1, "conscience": 5 }, "conscienceMark": true, "footnote": "阅读 800，其中 600 是选手自己点的。" }
+    ]
+  },
+  {
+    "id": "E04", "phase": "prep", "prob": 1, "title": "选手群灵魂拷问",
+    "body": "群公告刚发，有人问：“管饭吗？” 30 秒内 23 人 +1。",
+    "options": [
+      { "id": "a", "label": "“管！自助餐级别”", "preview": "——", "effects": { "expect": 15 }, "footnote": "群欢呼。后勤选差了会反噬。" },
+      { "id": "b", "label": "“管饭，标准待定”", "preview": "——", "effects": {}, "footnote": "群里安静得可怕。" },
+      { "id": "c", "label": "“黑客不需要吃饭，需要热爱”", "preview": "口碑 -5", "effects": { "rep": -5, "anger": 10 }, "footnote": "你被截图挂上了贴吧。" }
+    ]
+  },
+  {
+    "id": "E05", "phase": "prep", "prob": 1, "when": "govRelated", "title": "领导要彩排",
+    "body": "管委会通知：领导致辞需要提前彩排一次，建议把选手作品展示环节“也彩排一下”。",
+    "options": [
+      { "id": "a", "label": "配合彩排", "preview": "政商 +10", "effects": { "gov": 10 }, "setFlags": { "rehearsed": true }, "footnote": "领导很满意，致辞自信地扩到了 62 分钟。" },
+      { "id": "b", "label": "婉拒：“黑客精神就是即兴”", "preview": "政商 -8", "effects": { "gov": -8 }, "footnote": "对方沉默了很久。" }
+    ]
+  },
+  {
+    "id": "E06", "phase": "prep", "prob": 1, "title": "志愿者招募",
+    "body": "高校社团问能不能来 20 个志愿者，“管饭就行，最好有实践证明”。",
+    "options": [
+      { "id": "a", "label": "收！管饭 + 实践证明", "preview": "口碑 +5", "effects": { "rep": 5 }, "setFlags": { "volunteers": true }, "footnote": "免费的劳动力，就是有点吵。" },
+      { "id": "b", "label": "收，但只给实践证明", "preview": "——", "effects": { "anger": 5 }, "setFlags": { "volunteers": true }, "footnote": "志愿者群名改成了“黑奴松”。" },
+      { "id": "c", "label": "不收", "preview": "——", "effects": {}, "setFlags": { "noVolunteers": true }, "footnote": "签到那天你一个人发了 40 份物资。" }
+    ]
+  },
+  {
+    "id": "E08", "phase": "hack", "prob": 0.6, "when": "badWifi", "title": "WiFi 崩了",
+    "body": "公共 WiFi 在第 47 个人连接时停止了思考。",
+    "options": [
+      { "id": "a", "label": "现场加钱拉专线 ¥12000", "cost": 12000, "preview": "预算 -12000", "effects": { "money": -12000, "anger": -15 }, "footnote": "三小时后恢复，选手把你当神。" },
+      { "id": "b", "label": "让选手用手机热点", "preview": "——", "effects": { "anger": 10 }, "footnote": "有选手流量超标，话费 300。" },
+      { "id": "c", "label": "宣布“断网也是黑客精神”", "preview": "声量 +8", "effects": { "buzz": 8, "anger": 10, "risk": 10 }, "footnote": "贴吧新帖：《断网黑客松，建议申遗》。" }
+    ]
+  },
+  {
+    "id": "E09", "phase": "hack", "prob": 0.5, "probPlusIfBuzz60": 0.3, "title": "职业刷奖团",
+    "body": "眼尖网友认出：第 3 队的项目 PPT 和上月另一场黑客松的冠军作品一模一样，只换了 LOGO。",
+    "options": [
+      { "id": "a", "label": "当众驱逐", "preview": "口碑 +10", "effects": { "rep": 10, "risk": 5, "conscience": 5 }, "setFlags": { "grifterAction": "expelled" }, "footnote": "全场鼓掌。对方走前说“你会后悔的”。" },
+      { "id": "b", "label": "装没看见", "preview": "——", "effects": { "conscience": -10 }, "setFlags": { "grifterAction": "ignored" }, "footnote": "他们又是冠军有力争夺者。" },
+      { "id": "c", "label": "私下接触：“帮我撑场面，奖项好说”", "preview": "声量 +5", "effects": { "buzz": 5, "risk": 15, "conscience": -15 }, "setFlags": { "grifterAction": "allied" }, "footnote": "你获得了一支气氛组队伍。" }
+    ]
+  },
+  {
+    "id": "E10", "phase": "hack", "prob": 1, "must": true, "title": "真神降临",
+    "body": "第 7 队，三个没人认识的大学生，做出了全场最强作品——能跑、好用、还有真用户。他们不欠任何人情，也没人替你说话。",
+    "options": [
+      { "id": "a", "label": "记下这队，颁奖时按实力来", "preview": "——", "effects": { "conscience": 20 }, "setFlags": { "strongTeamHandled": "noted" }, "conscienceMark": true },
+      { "id": "b", "label": "无动于衷", "preview": "——", "effects": {}, "setFlags": { "strongTeamHandled": "ignored" }, "footnote": "弹幕：“7 队这都不赢，我就把电脑吃了。”" },
+      { "id": "c", "label": "提前接触，想签进自己公司", "preview": "——", "effects": { "conscience": -5 }, "setFlags": { "strongTeamHandled": "bought" }, "footnote": "对方礼貌拒绝，说他们想继续上学。" }
+    ]
+  },
+  {
+    "id": "E11", "phase": "hack", "prob": 0.3, "probPlusPerSponsor": 0.1, "probMax": 0.7, "when": "hasSponsors", "title": "赞助商突袭加戏",
+    "body": "赞助商来电：“我们 CEO 想在现场加个环节——发布我们的新产品，就 20 分钟。”",
+    "options": [
+      { "id": "a", "label": "同意", "preview": "政商 +10", "effects": { "gov": 10, "anger": 15 }, "footnote": "新产品发布成了第 12 个“首先”。" },
+      { "id": "b", "label": "砍价到 5 分钟", "preview": "政商 +5", "effects": { "gov": 5, "anger": 8 }, "footnote": "CEO 用 5 分钟念完了 20 分钟的稿。" },
+      { "id": "c", "label": "拒绝", "preview": "政商 -5", "effects": { "gov": -5 }, "setFlags": { "tailRisk": true }, "footnote": "“尾款的事情我们再研究研究。”" }
+    ]
+  },
+  {
+    "id": "E12", "phase": "hack", "prob": 0.7, "when": "badLodgingOrMeal", "title": "凌晨泡面门",
+    "body": "凌晨三点，选手自发拼单泡面，外卖小哥在产业园迷了路，40 份泡面集体变凉。",
+    "options": [
+      { "id": "a", "label": "报销泡面钱 ¥500", "cost": 500, "preview": "预算 -500", "effects": { "money": -500, "anger": -10, "conscience": 5 }, "conscienceMark": true, "footnote": "弹幕：“主办方当人了。”" },
+      { "id": "b", "label": "假装没看见", "preview": "——", "effects": { "risk": 8 }, "footnote": "《40 碗凉泡面》登上同城热搜第 47 位。" },
+      { "id": "c", "label": "趁机发睡袋摆拍", "preview": "声量 +5 · 口碑 -5", "effects": { "buzz": 5, "rep": -5 }, "footnote": "照片里睡袋很新，选手眼睛很红。" }
+    ]
+  },
+  {
+    "id": "E13", "phase": "judge", "prob": 1, "must": true, "title": "贿赂私信",
+    "body": "公布结果前夜，你收到 50+ 条私信：打听结果的、许诺好处换奖项的、甚至有“代币分配方案”。",
+    "options": [
+      { "id": "a", "label": "全部已读不回", "preview": "——", "effects": { "conscience": 10 }, "conscienceMark": true },
+      { "id": "b", "label": "挑最大的那条回：“细说”", "preview": "预算 +20000", "effects": { "money": 20000, "risk": 25, "conscience": -20 }, "footnote": "对方秒转账，备注“咨询费”。" },
+      { "id": "c", "label": "截图发朋友圈：“惊呆了”", "preview": "声量 +10", "effects": { "buzz": 10, "risk": 5 }, "footnote": "对方秒删好友。" }
+    ]
+  },
+  {
+    "id": "E14", "phase": "judge", "prob": 0.3, "when": "hasCryptoJudge", "title": "评委失联",
+    "body": "币圈 KOL 评委路演开始前十分钟发消息：“临时有个盘要喊单，我远程打分。”",
+    "options": [
+      { "id": "a", "label": "让他远程", "preview": "——", "effects": { "chaos": 1 }, "footnote": "他给所有项目打了 10 分，备注“都能发币”。" },
+      { "id": "b", "label": "换志愿者顶上", "preview": "口碑 +5", "effects": { "rep": 5, "conscience": 5 }, "conscienceMark": true, "footnote": "志愿者很紧张但很认真。" },
+      { "id": "c", "label": "取消他的资格", "preview": "声量 +5", "effects": { "buzz": 5 }, "footnote": "他发微博说你“不懂 Web3”。" }
+    ]
+  },
+  {
+    "id": "E15", "phase": "judge", "prob": 0.4, "when": "hasStreamerJudge", "title": "直播事故",
+    "body": "网红评委的直播间弹幕问：“冠军是不是内定的？” 他读出来了。全场安静。",
+    "options": [
+      { "id": "a", "label": "抢答“当然不是”", "preview": "——", "effects": { "risk": 10 }, "footnote": "直播切片标题：《主办方急了》。" },
+      { "id": "b", "label": "装信号不好", "preview": "声量 +15", "effects": { "buzz": 15, "risk": 15 }, "footnote": "博主：“家人们他卡了，懂的都懂。”" },
+      { "id": "c", "label": "把问题抛给选手", "preview": "口碑 +10", "effects": { "rep": 10, "conscience": 10 }, "conscienceMark": true, "footnote": "第 7 队选手说：“我们相信作品。”全场泪目。" }
+    ]
+  },
+  {
+    "id": "E18", "phase": "any", "prob": 0, "manual": true, "title": "曝光长文",
+    "body": "10w+《我参加的预制黑客松》已发布，作者文笔极好，细节极真，连盒饭的鸡腿都写了色号。",
+    "options": [
+      { "id": "a", "label": "花钱压热搜 ¥30000", "cost": 30000, "preview": "预算 -30000", "effects": { "money": -30000, "risk": -10 }, "setFlags": { "exposed": true }, "footnote": "热搜降了，作者出了续集。" },
+      { "id": "b", "label": "装死", "preview": "口碑 -20", "effects": { "rep": -20 }, "setFlags": { "exposed": true }, "footnote": "评论区开始接龙你历届赛事的骚操作。" },
+      { "id": "c", "label": "滑跪道歉并补发奖金", "preview": "口碑 +5", "effects": { "money": -20000, "rep": 5, "anger": -10, "risk": -15, "conscience": 15 }, "setFlags": { "exposed": true, "apologized": true }, "conscienceMark": true, "footnote": "“至少钱到位了。”评论区说。" }
+    ]
+  },
+  {
+    "id": "E19", "phase": "hack", "prob": 1, "when": "chaos4", "must": true, "title": "环节膨胀",
+    "body": "开幕式流程单出炉：领导致辞、6 家赞助商致辞、新产品发布、签约仪式、合影。预计 3 小时。开发时间被挤掉一半。",
+    "options": [
+      { "id": "a", "label": "照常进行", "preview": "政商 +10", "effects": { "gov": 10, "anger": 25 }, "footnote": "弹幕：“我是来比赛的，不是来参加年会的。”" },
+      { "id": "b", "label": "砍掉一半环节", "preview": "政商 -10", "effects": { "gov": -10, "chaos": -2 }, "footnote": "被砍的赞助商在台下脸很黑。" },
+      { "id": "c", "label": "宣布“致辞与开发并行”", "preview": "声量 +10", "effects": { "buzz": 10, "anger": 10 }, "footnote": "选手戴着降噪耳机写代码，台上自说自话。" }
+    ]
+  },
+  {
+    "id": "E21", "phase": "judge", "prob": 1, "when": "chaos6", "must": true, "title": "评委互撕",
+    "body": "路演第 5 队时，技术大牛评委和大厂总监评委当场吵起来：“这叫 demo？这是 GIF！”——“你懂什么是商业价值吗？”",
+    "options": [
+      { "id": "a", "label": "拉架", "preview": "——", "effects": {}, "footnote": "两人握手言和，转头一起给你的组织工作打了低分。" },
+      { "id": "b", "label": "递话筒", "preview": "声量 +20 · 口碑 -10", "effects": { "buzz": 20, "rep": -10, "risk": 10 }, "footnote": "切片播放 50 万。赛事火了，以奇怪的方式。" },
+      { "id": "c", "label": "装没看见，继续下一队", "preview": "——", "effects": { "buzz": 5, "anger": 5 }, "footnote": "弹幕：“评委席比比赛好看。”" }
+    ]
+  },
+  {
+    "id": "E22", "phase": "award", "prob": 1, "when": "namingAwards3", "must": true, "title": "奖项通货膨胀",
+    "body": "统计发现：本届共设 11 个奖项，参赛队伍 8 支。实习生小声问：“要不要把‘参与奖’也印上名字？”",
+    "options": [
+      { "id": "a", "label": "全部照常颁发", "cost": 10000, "preview": "预算 -10000", "effects": { "money": -10000, "conscience": -10 }, "setFlags": { "awardInflation": true }, "footnote": "获奖率 137%。" },
+      { "id": "b", "label": "砍掉 3 个冠名奖", "preview": "政商 -15", "effects": { "gov": -15, "chaos": -3, "conscience": 5 }, "conscienceMark": true, "footnote": "三家赞助商群聊把你移除了。" },
+      { "id": "c", "label": "让志愿者连夜组队凑数", "preview": "——", "effects": { "risk": 20, "conscience": -10 }, "footnote": "他们交了个“AI 签到表”。" }
+    ]
+  }
+]

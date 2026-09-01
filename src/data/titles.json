@@ -1,0 +1,16 @@
+{
+  "tiers": [
+    {
+      "tier": 1, "label": "朴素", "buzz": 5, "expect": 0, "crowd": 15,
+      "templates": ["{hype}开发者挑战赛", "{hype}创新工作坊", "XX 杯{hype}编程马拉松"]
+    },
+    {
+      "tier": 2, "label": "宏大", "buzz": 20, "expect": 20, "crowd": 25,
+      "templates": ["首届全国{hype}创新巅峰大赛", "{hype}产业生态赋能大会暨开发者盛典", "新质生产力·{hype}青年极客大会"]
+    },
+    {
+      "tier": 3, "label": "离谱", "buzz": 40, "expect": 50, "crowd": 40,
+      "templates": ["2026 全球宇宙级{hype}极客巅峰盛典（国际站）", "寰球首届{hype}生态化反开发者大会·总决赛季", "世界{hype}奥林匹克·全球总决赛（中国区·南区·本园区）"]
+    }
+  ]
+}

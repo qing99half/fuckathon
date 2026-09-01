@@ -1,0 +1,14 @@
+[
+  { "id": "agent", "name": "AI Agent 元年", "heat": 95, "sponsorEase": "easy", "weight": 12, "desc": "去年叫大模型，前年叫 AIGC，名字越换越智能。" },
+  { "id": "embodied", "name": "具身智能", "heat": 90, "sponsorEase": "easy", "weight": 11, "desc": "机器人还没站起来，PPT 已经跑了三轮融资。" },
+  { "id": "lowalt", "name": "低空经济", "heat": 85, "sponsorEase": "mid", "weight": 9, "desc": "无人机送外卖还没影，无人机比赛先办了八场。" },
+  { "id": "silver", "name": "银发科技", "heat": 70, "sponsorEase": "mid", "weight": 8, "desc": "评委平均年龄 58，参赛者平均年龄 20，谁服务谁不好说。" },
+  { "id": "petai", "name": "宠物 AI", "heat": 75, "sponsorEase": "easy", "weight": 8, "desc": "给猫做情绪识别。猫没意见，投资人有。" },
+  { "id": "web3", "name": "Web3 诈尸", "heat": 60, "sponsorEase": "luck", "weight": 7, "desc": "每隔一年半准时复活一次，比闹钟还准。" },
+  { "id": "metaverse", "name": "元宇宙遗老", "heat": 40, "sponsorEase": "hard", "weight": 6, "desc": "场地在元宇宙里，观众也在元宇宙里，赞助商希望预算也是虚拟的。" },
+  { "id": "quantum", "name": "量子计算（又来）", "heat": 55, "sponsorEase": "hard", "weight": 6, "desc": "选手听不懂，评委也听不懂，这就是量子态。" },
+  { "id": "duanju", "name": "短剧出海", "heat": 80, "sponsorEase": "easy", "weight": 9, "desc": "三天拍一部，两天写剧本，和你办赛的速度差不多。" },
+  { "id": "guzi", "name": "谷子经济", "heat": 65, "sponsorEase": "mid", "weight": 7, "desc": "一个铁皮徽章卖 80，你的奖牌成本 8 块，四舍五入你也是谷子。" },
+  { "id": "carbon", "name": "碳中和", "heat": 60, "sponsorEase": "mid", "weight": 6, "desc": "政府喜欢这个。领导讲话稿里已经出现了七次。" },
+  { "id": "heritage", "name": "国潮非遗", "heat": 50, "sponsorEase": "hard", "weight": 5, "desc": "让选手 48 小时用代码传承榫卯。鲁班看了想报警。" }
+]

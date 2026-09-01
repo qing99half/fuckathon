@@ -1,0 +1,192 @@
+/* 《预制黑客松模拟器》设计 token + 组件样式（红头文件 × 像素游戏） */
+:root {
+  --paper: #F7F3EA;
+  --ink: #1A1A1A;
+  --red: #C8102E;
+  --blue: #1D3557;
+  --green: #2A9D8F;
+  --yellow: #FFB703;
+  --gray: #8D99AE;
+  --night: #0D1B2A;
+  --glow: #4CC9F0;
+  --font-pixel-num: 'Press Start 2P', monospace;
+  --font-doc: 'Noto Serif SC', 'Source Han Serif SC', 'SimSun', serif;
+  --font-body: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  background: var(--night);
+  font-family: var(--font-body);
+  color: var(--ink);
+  overflow: hidden;
+  user-select: none;
+}
+#app { height: 100vh; display: flex; flex-direction: column; position: relative; }
+img, canvas { image-rendering: pixelated; }
+
+/* ---------- 标题画面 ---------- */
+.title-screen {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: var(--night) url('/assets/ui/title_bg.png') center/cover no-repeat;
+  position: relative; gap: 18px; padding: 24px;
+}
+.title-screen::before { content: ''; position: absolute; inset: 0; background: rgba(13, 27, 42, 0.55); }
+.title-screen > * { position: relative; }
+.title-logo { width: min(280px, 60vw); filter: drop-shadow(4px 4px 0 rgba(0,0,0,.6)); }
+.title-name {
+  font-family: var(--font-doc); font-weight: 900; color: var(--paper);
+  font-size: clamp(28px, 6vw, 44px); letter-spacing: 6px; text-shadow: 4px 4px 0 var(--red);
+}
+.title-sub { color: var(--gray); font-size: 14px; letter-spacing: 2px; }
+.title-disclaimer { color: #5a6b82; font-size: 12px; position: absolute; bottom: 14px; }
+
+/* ---------- 像素按钮 ---------- */
+.px-btn {
+  font-family: var(--font-body); font-weight: 700; font-size: 16px;
+  background: var(--red); color: var(--paper); border: 0; cursor: pointer;
+  padding: 12px 28px; min-height: 48px; letter-spacing: 2px;
+  box-shadow: 0 4px 0 #7a0a1d; transition: transform .1s;
+}
+.px-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #7a0a1d; }
+.px-btn.ghost { background: var(--blue); box-shadow: 0 4px 0 #10203a; }
+.px-btn.plain { background: #3a4a63; box-shadow: 0 4px 0 #232f42; }
+
+/* ---------- HUD ---------- */
+.hud {
+  display: flex; align-items: center; gap: 14px; padding: 8px 12px;
+  background: var(--paper); border-bottom: 3px solid var(--ink);
+  font-family: var(--font-pixel-num); font-size: 11px; flex-wrap: wrap;
+  position: relative; z-index: 20;
+}
+.hud-item { display: flex; align-items: center; gap: 5px; }
+.hud-item .ic { width: 18px; height: 18px; }
+.hud-col { display: flex; flex-direction: column; line-height: 1.15; }
+.hud-item .v { min-width: 40px; font-size: 12px; }
+.hud-label { font-size: 10px; color: var(--gray); font-family: var(--font-body); transform: scale(.92); transform-origin: left; }
+.hud-item.up .v { color: var(--green); animation: pulse .4s; }
+.hud-item.down .v { color: var(--red); animation: pulse .4s; }
+.hud-item.up .ic, .hud-item.down .ic { animation: icbounce .4s; }
+@keyframes pulse { 50% { transform: scale(1.35); } }
+@keyframes icbounce { 40% { transform: translateY(-4px); } }
+.hud-anger { flex: 1; min-width: 80px; height: 10px; background: #e2dccb; border: 2px solid var(--ink); position: relative; opacity: .85; }
+.hud-anger > i { display: block; height: 100%; background: linear-gradient(90deg, var(--yellow), var(--red)); transition: width .3s; }
+.hud-thermo { display: flex; align-items: center; }
+.hud-thermo .ic { width: 18px; height: 18px; }
+.hud-mute { margin-left: auto; background: none; border: 2px solid var(--ink); width: 34px; height: 34px; cursor: pointer; font-family: var(--font-pixel-num); font-size: 12px; background: var(--paper); }
+.hud-seed { font-size: 8px; color: var(--gray); }
+
+/* ---------- 场景容器 ---------- */
+.stage { flex: 1; position: relative; overflow: hidden; background: var(--night); }
+.scene-canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center top; display: none; }
+.stage.hack .scene-canvas { display: block; }
+
+/* ---------- 弹幕 ---------- */
+.barrage-box { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 15; }
+.barrage-item {
+  position: absolute; left: 0; top: 0; white-space: nowrap; font-size: 14px; color: #eaf6ff;
+  text-shadow: 1px 1px 0 #000; display: flex; align-items: center; gap: 4px;
+  will-change: transform; line-height: 20px;
+}
+.barrage-item.c { color: #ff9d7a; font-weight: 700; }
+.barrage-item.linked { color: var(--yellow); font-weight: 700; }
+.barrage-item .fire { width: 14px; height: 14px; }
+
+/* ---------- 抉择卡（系统弹窗） ---------- */
+.card-wrap {
+  position: absolute; inset: 0; display: flex; align-items: flex-end; justify-content: center;
+  padding: 12px; z-index: 25; pointer-events: none;
+}
+.stage:not(.hack) .card-wrap { align-items: center; background: var(--paper); }
+.stage:not(.hack) .card-wrap::before {
+  content: ''; position: absolute; inset: 0; opacity: .06;
+  background-image: repeating-linear-gradient(0deg, var(--ink) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(90deg, var(--ink) 0 1px, transparent 1px 28px);
+}
+.card {
+  pointer-events: auto; width: min(440px, 100%); max-height: 78vh; overflow-y: auto;
+  background: var(--paper); border: 3px solid var(--ink);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, .45); animation: cardin .18s ease-out;
+  position: relative;
+}
+@keyframes cardin { from { transform: translateY(16px); opacity: 0; } }
+.card-titlebar {
+  background: var(--blue); color: var(--paper); padding: 8px 12px;
+  font-weight: 700; font-size: 15px; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center;
+  position: sticky; top: 0;
+}
+.card-titlebar .dots { display: flex; gap: 4px; }
+.card-titlebar .dots i { width: 10px; height: 10px; background: var(--gray); display: block; }
+.card-titlebar .dots i:first-child { background: var(--red); }
+.card-titlebar .dots i:nth-child(2) { background: var(--yellow); }
+.card-body { padding: 14px; font-size: 15px; line-height: 1.75; white-space: pre-wrap; }
+.card-footnote { padding: 0 14px 10px; font-size: 12px; color: var(--gray); }
+.card-options { padding: 0 14px 14px; display: flex; flex-direction: column; gap: 8px; }
+.opt {
+  text-align: left; background: #fff; border: 2px solid var(--ink); padding: 10px 12px;
+  font-size: 15px; font-weight: 600; cursor: pointer; font-family: var(--font-body);
+  box-shadow: 3px 3px 0 rgba(0,0,0,.25); position: relative; transition: transform .08s;
+  min-height: 48px;
+}
+.opt:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 rgba(0,0,0,.25); }
+.opt .desc { display: block; font-weight: 400; font-size: 12.5px; color: #555; margin-top: 4px; line-height: 1.5; white-space: pre-wrap; }
+.opt .preview { display: block; font-size: 11px; color: var(--blue); margin-top: 4px; font-family: var(--font-pixel-num); }
+.opt.locked { opacity: .5; cursor: not-allowed; background: #eee; }
+.opt.locked::after { content: '预算不足'; position: absolute; right: 10px; top: 10px; font-size: 11px; color: var(--red); font-family: var(--font-pixel-num); }
+.opt .green-dot { position: absolute; right: 10px; top: 12px; width: 10px; height: 10px; background: var(--green); }
+.opt.single { text-align: center; font-size: 17px; }
+
+/* ---------- 中央反馈卡 ---------- */
+.fb-wrap {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  z-index: 45; cursor: pointer; background: rgba(20, 24, 36, .28);
+}
+.card.fb { width: min(360px, 88%); pointer-events: auto; max-height: none; }
+.card.fb .fb-body { text-align: center; font-size: 14.5px; padding: 18px 16px; }
+.card.fb.good .card-titlebar { background: var(--green); color: var(--ink); }
+.card.fb.warn .card-titlebar { background: var(--red); }
+.fb-wrap.out { animation: fbout .14s forwards; }
+@keyframes fbout { to { opacity: 0; transform: scale(.96); } }
+
+/* ---------- 翻车闪屏 ---------- */
+.riskflash { position: absolute; inset: 0; background: var(--red); opacity: 0; pointer-events: none; z-index: 35; }
+.riskflash.on { animation: flash .5s; }
+@keyframes flash { 20% { opacity: .45; } 100% { opacity: 0; } }
+
+/* ---------- 结局卡 ---------- */
+.ending-wrap {
+  position: absolute; inset: 0; z-index: 30; background: rgba(13, 27, 42, .92);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 16px;
+  overflow-y: auto;
+}
+.ending-canvas { width: min(360px, 88vw); box-shadow: 8px 8px 0 rgba(0,0,0,.5); }
+.ending-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+
+/* ---------- 图鉴 ---------- */
+.gallery { position: absolute; inset: 0; z-index: 30; background: var(--night); overflow-y: auto; padding: 20px; }
+.gallery h2 { color: var(--paper); font-family: var(--font-doc); letter-spacing: 4px; text-align: center; margin-bottom: 16px; }
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; max-width: 720px; margin: 0 auto; }
+.gallery-cell { aspect-ratio: 3/4; border: 2px solid #3a4a63; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--gray); font-size: 13px; background: #16233a; cursor: pointer; padding: 6px; text-align: center; gap: 6px; }
+.gallery-cell.unlocked { border-color: var(--red); color: var(--paper); background: var(--paper); }
+.gallery-cell.unlocked img { width: 100%; }
+.gallery-cell .no { font-family: var(--font-pixel-num); font-size: 9px; color: var(--yellow); }
+.gallery-close { display: block; margin: 18px auto 0; }
+
+/* ---------- debug ---------- */
+.debug-panel {
+  position: absolute; right: 8px; top: 52px; z-index: 50; background: rgba(0,0,0,.85);
+  color: #7CFC00; font-family: monospace; font-size: 11px; padding: 8px; line-height: 1.6;
+  white-space: pre; pointer-events: none;
+}
+
+/* ---------- 加载 ---------- */
+.loading { position: absolute; inset: 0; background: var(--night); display: flex; align-items: center; justify-content: center; color: var(--gray); z-index: 60; font-size: 14px; letter-spacing: 2px; flex-direction: column; gap: 12px; }
+.loading img { width: min(400px, 80vw); opacity: .9; }
+
+@media (prefers-reduced-motion: reduce) {
+  .barrage-item { animation-duration: 0s !important; display: none; }
+  .card { animation: none; }
+}
+@media (min-width: 900px) {
+  .card-wrap { padding-bottom: 28px; }
+}

@@ -1,0 +1,18 @@
+{
+  "sprites": {
+    "npc_delivery": 2,
+    "npc_leader": 2,
+    "npc_photographer": 2,
+    "npc_sponsor": 2,
+    "npc_volunteer": 4,
+    "player_designer": 8,
+    "player_glasses": 6,
+    "player_hardware": 8,
+    "player_hoodie": 9,
+    "player_pm": 6
+  },
+  "tiles": 45,
+  "icons": 36,
+  "banners": 10,
+  "endings": 13
+}
