@@ -2,21 +2,20 @@
 
 export const A = (p: string) => `assets/${p}`;
 
-// 角色帧语义：code 敲代码 / sleep 趴桌 / walk 走 / stand 站
+// 角色帧语义：code 敲代码 / sleep 趴桌 / walk 走 / stand 站（仅 NPC 单体图集使用）
 export const SPRITES: Record<string, { frames: number; code: number[]; sleep: number[]; walk: number[]; stand: number[] }> = {
-  player_hoodie:   { frames: 9, code: [0, 1], sleep: [2, 3], walk: [4, 5], stand: [6, 7, 8] },
-  player_designer: { frames: 8, code: [0, 1], sleep: [2, 3], walk: [4, 5], stand: [6, 7] },
-  player_glasses:  { frames: 6, code: [0, 1], sleep: [2, 3], walk: [4, 5], stand: [4] },
-  player_hardware: { frames: 8, code: [0, 1], sleep: [2, 3], walk: [4, 5], stand: [6, 7] },
-  player_pm:       { frames: 6, code: [0, 1], sleep: [2, 3], walk: [4, 4], stand: [5] },
   npc_leader:       { frames: 2, code: [1], sleep: [0], walk: [0], stand: [0] },   // 0 站立 1 讲话
   npc_photographer: { frames: 2, code: [0], sleep: [0], walk: [0], stand: [0] },   // 1 = 闪光灯
   npc_sponsor:      { frames: 2, code: [1], sleep: [0], walk: [0], stand: [0] },
   npc_delivery:     { frames: 2, code: [0], sleep: [0], walk: [1], stand: [0] },
   npc_volunteer:    { frames: 4, code: [0], sleep: [0], walk: [2, 3], stand: [0] }, // 0正 1背 2-3搬箱
 };
-export const PLAYER_PROTOS = ['player_hoodie', 'player_designer', 'player_glasses', 'player_hardware', 'player_pm'];
 export const SPRITE_CELL = 64;
+
+// 一体式工位图集：station_0..7，每张 5 帧固定顺序
+export const STATION_COUNT = 8;
+export const STATION_CELL = 96;
+export const STATION_FRAME = { code: 0, sleep: 1, stand: 2, phone: 3, empty: 4 } as const;
 
 // tiles.png：8 列 × 48px
 export const TILE = {
@@ -40,14 +39,7 @@ export const ICON = {
 export const ICON_COLS = 8;
 export const ICON_CELL = 24;
 
-// 赞助商横幅映射：banners_1 0-4 / banners_2 0-4
-export const BANNER_OF: Record<string, { sheet: 1 | 2; idx: number }> = {
-  suyun: { sheet: 1, idx: 0 }, pff: { sheet: 1, idx: 1 }, jianli: { sheet: 1, idx: 2 },
-  xuewang: { sheet: 1, idx: 3 }, yuzhou: { sheet: 1, idx: 4 },
-  fangqi: { sheet: 2, idx: 0 }, maomi: { sheet: 2, idx: 1 }, english: { sheet: 2, idx: 2 },
-  wedding: { sheet: 2, idx: 3 }, jixue: { sheet: 2, idx: 4 },
-};
-export const BANNER_CELL = { w: 96, h: 24 };
+// 赞助商横幅：程序化绘制（红绸+金字），不再使用图集
 
 // 结局 id → 插画文件
 export const ENDING_IMG: Record<string, string> = {
@@ -58,6 +50,11 @@ export const ENDING_IMG: Record<string, string> = {
   balance: 'ending_09_balance.png', leaderhappy: 'ending_10_leader.png',
   grifter: 'ending_11_grifter.png', withdrawal: 'ending_12_withdrawal.png',
   annual: 'ending_13_annual.png',
+  die_sunge: 'ending_14_sunge.png', die_cognition: 'ending_15_cognition.png',
+  die_runaway: 'ending_16_runaway.png', die_meal: 'ending_17_meal.png',
+  die_power: 'ending_18_power.png', die_leader: 'ending_19_leader.png',
+  die_fight: 'ending_20_fight.png', die_screen: 'ending_21_screen.png',
+  die_ban: 'ending_22_ban.png',
 };
 
 // 图片加载器（带缓存）

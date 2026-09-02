@@ -116,6 +116,52 @@ def pack(frames, cw, ch, cols=None):
 
 # ---------- 角色图集 ----------
 
+def content_bbox(im: Image.Image, thr=200, mass_ratio=0.01):
+    """投影法求内容包围盒：抗零散噪点（低透明度散点不参与定界）"""
+    a = im.getchannel('A').point(lambda v: 255 if v >= thr else 0)
+    w, h = a.size
+    px = a.load()
+    col = [sum(px[x, y] for y in range(0, h, 2)) for x in range(w)]
+    row = [sum(px[x, y] for x in range(0, w, 2)) for y in range(h)]
+    cmax, rmax = max(col) or 1, max(row) or 1
+    xs = [x for x in range(w) if col[x] > cmax * mass_ratio]
+    ys = [y for y in range(h) if row[y] > rmax * mass_ratio]
+    if not xs or not ys: return None
+    return (min(xs), min(ys), max(xs) + 1, max(ys) + 1)
+
+def process_station(src, name, cell=(96, 96), cols=5, colors=16):
+    """工位一体图集：整排 alpha bbox → 等宽 5 列切帧（敲代码/趴桌/举手/看手机/空位）
+    注意：必须先在原始 alpha 上定界（clean_alpha 会把噪点二值化成 255）"""
+    im = Image.open(src).convert('RGBA')
+    im = erase_watermark(im)
+    bbox = content_bbox(im)
+    if not bbox:
+        print(f'{name}: 空图！')
+        return 0
+    raw_row = im.crop(bbox)
+    row = clean_alpha(raw_row.copy())
+    rw, rh = row.size
+    sw = rw / cols
+    frames = []
+    for i in range(cols):
+        sl = (int(i * sw), 0, int((i + 1) * sw), rh)
+        strip = row.crop(sl)
+        sb = content_bbox(raw_row.crop(sl))
+        if sb: strip = strip.crop(sb)
+        frames.append(fit_cell(quantize_rgba(strip, colors), *cell))
+    sheet = pack(frames, *cell)
+    sheet.save(os.path.join(OUT, 'sprites', f'{name}.png'), optimize=True)
+    # 核对图
+    from PIL import ImageDraw
+    review = Image.new('RGBA', (cols * 120, 140), (30, 30, 40, 255))
+    d = ImageDraw.Draw(review)
+    for i, f in enumerate(frames):
+        review.paste(f, (i * 120 + 12, 5), f)
+        d.text((i * 120 + 12, 118), f'#{i}', fill=(255, 255, 0, 255))
+    review.save(os.path.join(REVIEW, f'contact_{name}.png'))
+    print(f'{name}: {len(frames)} 帧（等宽切）')
+    return len(frames)
+
 def process_character(src, name, cell=(64, 64), colors=16, min_area=300, row_tol=140, merge_margin=10):
     im = Image.open(src).convert('RGBA')
     im = erase_watermark(im)
@@ -178,7 +224,10 @@ if __name__ == '__main__':
     sp = os.path.join(ASSETS_RAW, 'sprites')
     for f in sorted(os.listdir(sp)):
         name = f[:-4]
-        n = process_character(os.path.join(sp, f), name)
+        if name.startswith('station_'):
+            n = process_station(os.path.join(sp, f), name)
+        else:
+            n = process_character(os.path.join(sp, f), name)
         manifest['sprites'][name] = n
 
     manifest['tiles'] = process_objects(os.path.join(ASSETS_RAW, 'tiles', 'tileset.png'), 'tiles', (48, 48), cols=8)

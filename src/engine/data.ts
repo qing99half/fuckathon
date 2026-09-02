@@ -32,10 +32,11 @@ export interface Sponsor {
 export interface JudgeCand extends Judge {
   needsPatron?: string; needsBuzz?: number;
   needsSponsor?: string; needsConscience?: number;
+  filler?: boolean;       // 凑数评委：只在池子空了时兜底
 }
 export interface EventCardJson {
   id: string; phase: string; prob: number; must?: boolean; manual?: boolean;
-  when?: string;
+  when?: string; cause?: string;
   probPlusIfTier3?: number; probPlusIfBuzz60?: number;
   probPlusPerSponsor?: number; probMax?: number;
   title: string; body: string;
@@ -43,13 +44,15 @@ export interface EventCardJson {
     id: string; label: string; desc?: string; cost?: number; preview?: string;
     effects: Record<string, number>;
     setFlags?: Record<string, string | number | boolean>;
-    conscienceMark?: boolean; footnote?: string;
+    conscienceMark?: boolean; footnote?: string; warn?: boolean;
   }[];
 }
 export interface EndingJson {
   id: string; no: number; title: string; priority: number;
   when: Record<string, string | boolean>;
   text: string;
+  death?: boolean;        // 暴毙结局
+  comments?: string;      // 结算卡锐评
 }
 
 export const HYPES = hypesJson as Hype[];
@@ -82,9 +85,10 @@ export function eventToCard(e: EventCardJson): Card {
     phase: e.phase as Card['phase'],
     title: e.title,
     body: e.body,
+    cause: e.cause,
     options: e.options.map(o => ({
       id: o.id, label: o.label, desc: o.desc, cost: o.cost, preview: o.preview,
-      effects: o.effects, setFlags: o.setFlags, conscienceMark: o.conscienceMark,
+      effects: o.effects, setFlags: o.setFlags, conscienceMark: o.conscienceMark, warn: o.warn,
     })),
   };
 }

@@ -36,7 +36,7 @@
     ]
   },
   {
-    "id": "E05", "phase": "prep", "prob": 1, "when": "govRelated", "title": "领导要彩排",
+    "id": "E05", "phase": "prep", "prob": 1, "when": "govRelated", "title": "领导要彩排", "cause": "拿了专班钱的后果",
     "body": "管委会通知：领导致辞需要提前彩排一次，建议把选手作品展示环节“也彩排一下”。",
     "options": [
       { "id": "a", "label": "配合彩排", "preview": "政商 +10", "effects": { "gov": 10 }, "setFlags": { "rehearsed": true }, "footnote": "领导很满意，致辞自信地扩到了 62 分钟。" },
@@ -53,7 +53,7 @@
     ]
   },
   {
-    "id": "E08", "phase": "hack", "prob": 0.6, "when": "badWifi", "title": "WiFi 崩了",
+    "id": "E08", "phase": "hack", "prob": 0.6, "when": "badWifi", "title": "WiFi 崩了", "cause": "蹭公共 WiFi 的后果",
     "body": "公共 WiFi 在第 47 个人连接时停止了思考。",
     "options": [
       { "id": "a", "label": "现场加钱拉专线 ¥12000", "cost": 12000, "preview": "预算 -12000", "effects": { "money": -12000, "anger": -15 }, "footnote": "三小时后恢复，选手把你当神。" },
@@ -89,7 +89,7 @@
     ]
   },
   {
-    "id": "E12", "phase": "hack", "prob": 0.7, "when": "badLodgingOrMeal", "title": "凌晨泡面门",
+    "id": "E12", "phase": "hack", "prob": 0.7, "when": "badLodgingOrMeal", "title": "凌晨泡面门", "cause": "后勤缩水的后果",
     "body": "凌晨三点，选手自发拼单泡面，外卖小哥在产业园迷了路，40 份泡面集体变凉。",
     "options": [
       { "id": "a", "label": "报销泡面钱 ¥500", "cost": 500, "preview": "预算 -500", "effects": { "money": -500, "anger": -10, "conscience": 5 }, "conscienceMark": true, "footnote": "弹幕：“主办方当人了。”" },
@@ -102,12 +102,12 @@
     "body": "公布结果前夜，你收到 50+ 条私信：打听结果的、许诺好处换奖项的、甚至有“代币分配方案”。",
     "options": [
       { "id": "a", "label": "全部已读不回", "preview": "——", "effects": { "conscience": 10 }, "conscienceMark": true },
-      { "id": "b", "label": "挑最大的那条回：“细说”", "preview": "预算 +20000", "effects": { "money": 20000, "risk": 25, "conscience": -20 }, "footnote": "对方秒转账，备注“咨询费”。" },
+      { "id": "b", "label": "挑最大的那条回：“细说”", "preview": "预算 +20000", "effects": { "money": 20000, "risk": 25, "conscience": -20 }, "setFlags": { "bribed": true }, "warn": true, "footnote": "对方秒转账，备注“咨询费”。" },
       { "id": "c", "label": "截图发朋友圈：“惊呆了”", "preview": "声量 +10", "effects": { "buzz": 10, "risk": 5 }, "footnote": "对方秒删好友。" }
     ]
   },
   {
-    "id": "E14", "phase": "judge", "prob": 0.3, "when": "hasCryptoJudge", "title": "评委失联",
+    "id": "E14", "phase": "judge", "prob": 0.3, "when": "hasCryptoJudge", "title": "评委失联", "cause": "请孙割系评委的后果",
     "body": "币圈 KOL 评委路演开始前十分钟发消息：“临时有个盘要喊单，我远程打分。”",
     "options": [
       { "id": "a", "label": "让他远程", "preview": "——", "effects": { "chaos": 1 }, "footnote": "他给所有项目打了 10 分，备注“都能发币”。" },
@@ -116,7 +116,7 @@
     ]
   },
   {
-    "id": "E15", "phase": "judge", "prob": 0.4, "when": "hasStreamerJudge", "title": "直播事故",
+    "id": "E15", "phase": "judge", "prob": 0.4, "when": "hasStreamerJudge", "title": "直播事故", "cause": "请网红评委的后果",
     "body": "网红评委的直播间弹幕问：“冠军是不是内定的？” 他读出来了。全场安静。",
     "options": [
       { "id": "a", "label": "抢答“当然不是”", "preview": "——", "effects": { "risk": 10 }, "footnote": "直播切片标题：《主办方急了》。" },
@@ -134,7 +134,7 @@
     ]
   },
   {
-    "id": "E19", "phase": "hack", "prob": 1, "when": "chaos4", "must": true, "title": "环节膨胀",
+    "id": "E19", "phase": "hack", "prob": 1, "when": "chaos4", "must": true, "title": "环节膨胀", "cause": "赞助签太多的后果",
     "body": "开幕式流程单出炉：领导致辞、6 家赞助商致辞、新产品发布、签约仪式、合影。预计 3 小时。开发时间被挤掉一半。",
     "options": [
       { "id": "a", "label": "照常进行", "preview": "政商 +10", "effects": { "gov": 10, "anger": 25 }, "footnote": "弹幕：“我是来比赛的，不是来参加年会的。”" },
@@ -143,7 +143,7 @@
     ]
   },
   {
-    "id": "E21", "phase": "judge", "prob": 1, "when": "chaos6", "must": true, "title": "评委互撕",
+    "id": "E21", "phase": "judge", "prob": 1, "when": "chaos6", "must": true, "title": "评委互撕", "cause": "赞助签太多的后果",
     "body": "路演第 5 队时，技术大牛评委和大厂总监评委当场吵起来：“这叫 demo？这是 GIF！”——“你懂什么是商业价值吗？”",
     "options": [
       { "id": "a", "label": "拉架", "preview": "——", "effects": {}, "footnote": "两人握手言和，转头一起给你的组织工作打了低分。" },
@@ -152,7 +152,7 @@
     ]
   },
   {
-    "id": "E22", "phase": "award", "prob": 1, "when": "namingAwards3", "must": true, "title": "奖项通货膨胀",
+    "id": "E22", "phase": "award", "prob": 1, "when": "namingAwards3", "must": true, "title": "奖项通货膨胀", "cause": "冠名奖卖太多的后果",
     "body": "统计发现：本届共设 11 个奖项，参赛队伍 8 支。实习生小声问：“要不要把‘参与奖’也印上名字？”",
     "options": [
       { "id": "a", "label": "全部照常颁发", "cost": 10000, "preview": "预算 -10000", "effects": { "money": -10000, "conscience": -10 }, "setFlags": { "awardInflation": true }, "footnote": "获奖率 137%。" },

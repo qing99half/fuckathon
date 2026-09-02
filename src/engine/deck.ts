@@ -7,6 +7,7 @@ import {
   getEventCard, eventToCard, mainCopy, type Sponsor, type JudgeCand,
 } from './data';
 import { genTeams, initialBoard } from './judge';
+import { matchEnding } from './ending';
 
 const C = (id: string, phase: Card['phase'], title: string, body: string, options: Option[], footnote?: string): Card =>
   ({ id, phase, title, body, options, footnote });
@@ -34,6 +35,7 @@ export function sponsorAmt(s: RunState, sp: Sponsor): number {
   if (s.flags.sponsorCut) amt *= Number(s.flags.sponsorCut);
   const h = hypeOf(s);
   if (h?.sponsorEase === 'hard') amt *= 0.8;
+  if (s.rep < 25) amt *= 0.8; // 黑红状态：赞助金额打 8 折
   return Math.round(amt / 1000) * 1000;
 }
 
@@ -187,16 +189,22 @@ function stageJudgeBuild(s: RunState, rng: Rng): Card[] {
     if (j && !auto.some(a => a.id === j.id)) auto.push(j);
   }
   const slots = Math.min(5 + auto.length, 9);
-  const picked = new Set(auto.map(j => j.id));
+  const offered = new Set(auto.map(j => j.id)); // 已出现的评委不再进入后续候选（排重 bug 修复）
   const autoText = auto.length ? `其中 ${auto.length} 席，赞助商已经“安排”好了。` : '全部席位你说了算。';
   const cards: Card[] = [
     M('JHEAD', 'prep', [O('next', '开始摇人', {})], { slots, auto: autoText }),
   ];
   let seatNo = auto.length;
   while (seatNo < slots) {
-    const pool = rng.shuffle(JUDGES.filter(j => !picked.has(j.id) && judgeEligible(s, j)));
+    let pool = rng.shuffle(JUDGES.filter(j => !j.filler && !offered.has(j.id) && judgeEligible(s, j)));
+    if (pool.length < 3) {
+      // 池子不够：凑数评委顶上（实习生/主持人客串）
+      const fillers = rng.shuffle(JUDGES.filter(j => j.filler && !offered.has(j.id)));
+      pool = [...pool, ...fillers];
+    }
     const cand = pool.slice(0, 3);
     if (!cand.length) break;
+    for (const j of cand) offered.add(j.id);
     seatNo++;
     cards.push(M('JD', 'prep', cand.map(j =>
       O(`judge_${j.id}`, `${j.name}｜${j.tag}`, {}, { desc: j.flavor })), { n: seatNo }));
@@ -206,9 +214,16 @@ function stageJudgeBuild(s: RunState, rng: Rng): Card[] {
 }
 
 function stagePrepRecap(s: RunState): Card[] {
-  return [M('PREP_DONE', 'prep', [O('next', '开幕', {})], {
+  const out: Card[] = [];
+  // D3 扒皮抢救窗口：声量≥80 且口碑≤30（筹备收官时清算）
+  if (s.buzz >= 80 && s.rep <= 30 && !s.flags.fired_D3) {
+    s.flags.fired_D3 = true;
+    out.push(buildDeathCard(DEATHS.find(d => d.id === 'D3')!));
+  }
+  out.push(M('PREP_DONE', 'prep', [O('next', '开幕', {})], {
     n: s.sponsors.length, judges: s.judges.length || '待定', chaos: s.chaos,
-  })];
+  }));
+  return out;
 }
 
 // ---------- 比赛期 ----------
@@ -243,6 +258,11 @@ function stageHackEvents(s: RunState, rng: Rng): Card[] {
   if (s.sponsors.length > 0) push('E11', Math.min(0.3 + 0.1 * s.sponsors.length, 0.7));
   const badLiving = s.lodging === 'none' || s.mealTier === 15;
   if (badLiving) push('E12', 0.7);
+  // D5 盒饭中毒抢救窗口：15 元盒饭 + 35% 发作
+  if (s.mealTier === 15 && !s.flags.fired_D5 && rng.chance(0.35)) {
+    s.flags.fired_D5 = true;
+    out.push(buildDeathCard(DEATHS.find(d => d.id === 'D5')!));
+  }
   return out;
 }
 
@@ -258,13 +278,14 @@ function stageJudgeIntro(s: RunState): Card[] {
 }
 
 function stageDemos(s: RunState, rng: Rng): Card[] {
+  const total = s.teams.length;
   return s.teams.map((t, i) => {
     const line = rng.chance(0.5)
       ? rng.pick(['作品完成度不错，就看评委懂不懂了', '这队黑眼圈比代码行数多'])
       : rng.pick(['路演顺序好像是按充值排序的', 'PPT 字体统一，教授狂喜']);
     const j = s.judges.length ? rng.pick(s.judges) : null;
-    const card = M('DEMO', 'judge', [O('next', i === 7 ? '进入评审' : '下一队', {})], {
-      i: i + 1, team: t.name, project: t.project, desc: t.projectDesc,
+    const card = M('DEMO', 'judge', [O('next', i === total - 1 ? '进入评审' : '下一队', {})], {
+      i: i + 1, total, team: t.name, project: t.project, desc: t.projectDesc,
       barr: line, judge: j ? `\n${j.name}：“${j.line}”` : '',
     });
     card.id = `DEMO_${i}`;
@@ -316,8 +337,13 @@ function stageE20(s: RunState): Card[] {
 
 function stageAward(s: RunState, rng: Rng): Card[] {
   const out: Card[] = [];
-  if (s.patronId === 'crypto' && !s.flags.cryptoCrash && rng.chance(0.3)) {
-    out.push(M('E23', 'award', [O('next', '……', { money: -60000 })]));
+  // D2 孙割跑路抢救窗口：币圈金主 + 混乱≥5（颁奖前清算）
+  if (s.patronId === 'crypto' && s.chaos >= 5 && !s.flags.fired_D2) {
+    s.flags.fired_D2 = true;
+    out.push(buildDeathCard(DEATHS.find(d => d.id === 'D2')!));
+  }
+  if (s.patronId === 'crypto' && !s.flags.cryptoCrash && !s.flags.deathId && rng.chance(0.3)) {
+    out.push(M('E23', 'award', [O('next', '……', { money: -60000 })], undefined));
   }
   const naming = s.sponsors.filter(x => x.namingAward && !x.allied).length;
   if (naming >= 3) { const c = ev('E22'); if (c) out.push(c); }
@@ -344,11 +370,63 @@ function stageSettle(s: RunState, repFinal: number): Card[] {
   if (repFinal <= 30) comments.push('口碑 ≤30：选手群名改成了“避雷信息共享群”。');
   if (s.money < 0) comments.push('预算为负：你为梦想窒息了，字面意思。');
   if (s.gov >= 90) comments.push('政商 ≥90：领导记下了你的名字。这既是好事，也是坏事。');
+  // 结局锐评（文案清单批次 6 冻结版）
+  const ending = matchEnding(s, repFinal);
+  if (ending.comments) comments.push(ending.comments);
   if (!comments.length) comments.push('各方面都很平庸——这在黑客松行业算夸奖。');
   return [M('SETTLE', 'settle', [O('next', '查看结局', {})], {
     money: s.money.toLocaleString(), buzz: s.buzz, gov: s.gov, rep: repFinal,
     comments: comments.join('\n'),
   })];
+}
+
+// ---------- 暴毙抢救窗口（D 系列红卡） ----------
+
+interface DeathDef {
+  id: string;           // D2~D10
+  deathId: string;      // 对应结局 id
+  cause: string;        // 溯源标注
+  payCost: number; payLabel: string; payFx: Option['effects'];
+  submitLabel: string; submitFx: Option['effects'];
+  dieRate: number;      // 硬扛死亡率
+}
+
+export const DEATHS: DeathDef[] = [
+  { id: 'D2', deathId: 'die_sunge', cause: '拿孙割钱的后果', payCost: 40000, payLabel: '自掏腰包垫付 · ¥40000', payFx: { money: -40000 }, submitLabel: '颁奖典礼改食堂举行', submitFx: { buzz: -20 }, dieRate: 0.6 },
+  { id: 'D3', deathId: 'die_cognition', cause: '通稿吹过头的后果', payCost: 20000, payLabel: '花钱删帖 · ¥20000', payFx: { money: -20000 }, submitLabel: '发声明"统计口径存在认知偏差"', submitFx: { rep: -10 }, dieRate: 0.6 },
+  { id: 'D4', deathId: 'die_runaway', cause: '怨气压不住的后果', payCost: 10000, payLabel: '全场夜宵+打车补贴 · ¥10000', payFx: { money: -10000, anger: -20 }, submitLabel: '广播承诺天亮就发补助', submitFx: { anger: -20, conscience: -10 }, dieRate: 0.7 },
+  { id: 'D5', deathId: 'die_meal', cause: '15 元盒饭的报应', payCost: 15000, payLabel: '全场升级 60 元餐标 · ¥15000', payFx: { money: -15000, anger: -20 }, submitLabel: '宣布"明日升级餐标"', submitFx: { anger: -15 }, dieRate: 0.5 },
+  { id: 'D6', deathId: 'die_power', cause: '让选手用热点的后果', payCost: 12000, payLabel: '加钱拉专线 · ¥12000', payFx: { money: -12000, anger: -15 }, submitLabel: '强制一半队伍回酒店办公', submitFx: { rep: -15 }, dieRate: 0.65 },
+  { id: 'D7', deathId: 'die_leader', cause: '领导面前出洋相的后果', payCost: 8000, payLabel: '立刻清场整改+工作餐叙旧 · ¥8000', payFx: { money: -8000, chaos: -2 }, submitLabel: '解释"这是黑客文化"', submitFx: { gov: -15 }, dieRate: 0.7 },
+  { id: 'D8', deathId: 'die_fight', cause: '评委席失控的后果', payCost: 6000, payLabel: '中场茶歇+红包安抚 · ¥6000', payFx: { money: -6000 }, submitLabel: '宣布"评审采用民主集中制"——你一个人集中', submitFx: { rep: -10 }, dieRate: 0.6 },
+  { id: 'D9', deathId: 'die_screen', cause: '内定痕迹太多的后果', payCost: 10000, payLabel: '连夜召回+重做全部物料 · ¥10000', payFx: { money: -10000, risk: -20 }, submitLabel: '宣布增加三个"特别奖"平衡', submitFx: { conscience: -10 }, dieRate: 0.65 },
+  { id: 'D10', deathId: 'die_ban', cause: '直播放飞的后果', payCost: 15000, payLabel: '关闭直播+公关声明 · ¥15000', payFx: { money: -15000, buzz: -10 }, submitLabel: '主播含泪下播', submitFx: { buzz: -20 }, dieRate: 0.6 },
+];
+
+export function buildDeathCard(def: DeathDef): Card {
+  const c = mainCopy(def.id);
+  return {
+    id: def.id, phase: 'any' as Card['phase'], title: c.title, body: c.body,
+    cause: def.cause, deathRisk: def.dieRate,
+    options: [
+      { id: 'pay', label: def.payLabel, cost: def.payCost, effects: def.payFx, preview: `预算 -${def.payCost}`, warn: true },
+      { id: 'submit', label: def.submitLabel, effects: def.submitFx, warn: true, desc: '认怂。破财免灾的穷人版。' },
+      { id: 'hard', label: '硬扛', effects: {}, warn: true, desc: `死亡率 ${Math.round(def.dieRate * 100)}%。弹幕会记住你的。` },
+    ],
+  };
+}
+
+/** 热搜第一强制事件（risk≥80） */
+export function buildE24(): Card {
+  const c = mainCopy('E24');
+  return {
+    id: 'E24', phase: 'any' as Card['phase'], title: c.title, body: c.body, cause: '风险值爆表的后果',
+    options: [
+      { id: 'apologize', label: '发道歉声明+公关 · ¥20000', cost: 20000, effects: { money: -20000, risk: -30, conscience: 10 }, preview: '预算 -20000', conscienceMark: true },
+      { id: 'dead', label: '装死', effects: { rep: -30 }, warn: true, desc: '评论区会替你发言的。' },
+      { id: 'lawyer', label: '律师函警告', effects: {}, warn: true, desc: '50% 翻盘，50% 被锤得更死。' },
+    ],
+  };
 }
 
 // ---------- 阶段推进主入口 ----------
@@ -398,6 +476,23 @@ export function deckNext(s: RunState, rng: Rng, repFinal: number): Card[] {
       s.flags.stage = 'demos';
       // 进入评审期：生成队伍 + 计算评委初榜并缓存
       buildTeams(s, rng);
+      // 退赛潮：被挂且未道歉 → 路演队伍 -2（惩罚 ladder）
+      if (s.exposed && !s.apologized && s.teams.length > 3) {
+        const sorted = [...s.teams].sort((a, b) => a.q - b.q);
+        const drop = new Set(sorted.slice(0, 2).map(t => t.id));
+        s.teams = s.teams.filter(t => !drop.has(t.id));
+        s.flags.withdrawalWave = true;
+      }
+      // D9 名单危机抢救窗口：怨气≥85 + 内定痕迹≥2
+      const traces = [s.grifterAction === 'allied', s.strongTeamHandled === 'bought',
+        s.sponsors.some(x => x.judgeSeat && !x.allied), Boolean(s.flags.bribed)].filter(Boolean).length;
+      if (s.anger >= 85 && traces >= 2 && !s.flags.fired_D9) {
+        s.flags.fired_D9 = true;
+        const d9 = buildDeathCard(DEATHS.find(d => d.id === 'D9')!);
+        const board0 = initialBoard(s.teams, s.judges, rng);
+        s.flags.__board = board0.map(r => ({ name: r.team.name, score: r.score, id: r.team.id })) as unknown as string;
+        return [d9, ...stageJudgeIntro(s)];
+      }
       const board = initialBoard(s.teams, s.judges, rng);
       s.flags.__board = board.map(r => ({ name: r.team.name, score: r.score, id: r.team.id })) as unknown as string;
       return stageJudgeIntro(s);

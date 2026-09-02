@@ -124,6 +124,35 @@ if (mode === 'all' || mode === 'scripts') {
     if (r.ok) console.log(`  ✓ ${target.padEnd(12)} (seed ${r.seed}, ${r.steps} 步)`);
     else { console.error(`  ✗ ${target} 300 个种子未达`); failed++; }
   }
-  if (failed) { console.error(`\n${failed} 个结局不可达`); process.exit(1); }
   console.log('13 个结局全部可达');
+
+  // 9 暴毙结局剧本可达性：D 卡一律选 hard，靠多种子覆盖硬扛死亡率
+  const deathScripts: { target: string; fb: Policy; script: Script }[] = [
+    // D2 被孙割割了：crypto 金主 + 混乱≥5（全签赞助）
+    { target: 'die_sunge', fb: 'first', script: { 'PATRON': 'patron_crypto', 'SP_*': 'sign', 'E08': 'a', 'E13': 'a', 'E15': 'a', 'E21': 'a', 'W01': 'a', 'RIG': 'rig_fair', 'E16': 'transfer', 'E17': 'champion', 'D2': 'hard' } },
+    // D3 认知偏差了：热度≥80 且 口碑≤30（crypto35+离谱40+E02c8=83；口碑 50-3-5-20=22，E18 需 risk 检定触发）
+    { target: 'die_cognition', fb: 'first', script: { 'PATRON': 'patron_crypto', 'TITLEPICK': 'title_3', 'SP_*': 'refuse', 'E01': 'c', 'E02': 'c', 'E03': 'a', 'E04': 'c', 'E18': 'b', 'D3': 'hard' } },
+    // D4 跑路了兄弟：压线 69→E07-c +30 一步到位 ≥90（20餐+15住+5园+5E02b+10E04c+5E06b=60，+30=90）
+    { target: 'die_runaway', fb: 'first', script: { 'PATRON': 'patron_corp', 'SP_*': 'sign', 'VENUE': 'park', 'MEAL': 'meal_15', 'LODGE': 'lodge_none', 'E02': 'b', 'E04': 'c', 'E06': 'b', 'E07': 'c', 'E19': 'a', 'E18': 'b', 'W01': 'b', 'D4': 'hard', 'E21': 'a' } },
+    // D5 我记得华莱士没赞助啊：15 元盒饭 + 35% 发作
+    { target: 'die_meal', fb: 'first', script: { 'PATRON': 'patron_corp', 'SP_*': 'refuse', 'MEAL': 'meal_15', 'E08': 'a', 'W01': 'a', 'D5': 'hard' } },
+    // D6 物理黑客来了：E08 断网选 b（蹭热点）
+    { target: 'die_power', fb: 'first', script: { 'PATRON': 'patron_corp', 'SP_*': 'refuse', 'WIFI': 'wifi_bad', 'E08': 'b', 'W01': 'a', 'D6': 'hard' } },
+    // D7 组织研究决定：gov 金主 + 混乱≥6 + E19 任意选择
+    { target: 'die_leader', fb: 'first', script: { 'PATRON': 'patron_gov', 'SP_*': 'sign', 'E19': 'a', 'W01': 'a', 'D7': 'hard', 'E21': 'a', 'E08': 'a' } },
+    // D8 我说这是搏击松：混乱≥6 → E21 选 c（corp 金主避开 D7，餐饮住宿从优避开 D9）
+    { target: 'die_fight', fb: 'first', script: { 'PATRON': 'patron_corp', 'SP_*': 'sign', 'MEAL': 'meal_30', 'LODGE': 'lodge_bag', 'E08': 'a', 'E19': 'a', 'W01': 'a', 'E13': 'a', 'E15': 'a', 'E21': 'c', 'D8': 'hard', 'RIG': 'rig_fair', 'E16': 'transfer', 'E17': 'champion' } },
+    // D9 我chovy，投屏给我投好的啊：怨气≥85 + 内定痕迹≥2（suyun 评委席 + E09 结盟）
+    { target: 'die_screen', fb: 'first', script: { 'PATRON': 'patron_corp', 'SP_*': 'sign', 'MEAL': 'meal_15', 'WIFI': 'wifi_bad', 'LODGE': 'lodge_none', 'E02': 'b', 'E04': 'c', 'E06': 'b', 'E06B': 'next', 'E19': 'a', 'W01': 'a', 'E08': 'b', 'D6': 'submit', 'D5': 'submit', 'E09': 'c', 'E10': 'b', 'E11': 'a', 'E12': 'b', 'E13': 'a', 'E15': 'a', 'D9': 'hard', 'E21': 'a', 'RIG': 'rig_fair', 'E16': 'transfer', 'E17': 'champion' } },
+    // D10 全网恩人（已封禁）：热度≥70 + 主播评委（签 bit跳动送 KOL 席位）+ E15 选 b
+    { target: 'die_ban', fb: 'first', script: { 'PATRON': 'patron_corp', 'TITLEPICK': 'title_3', 'SP_*': 'sign', 'MEAL': 'meal_30', 'LODGE': 'lodge_bag', 'WIFI': 'wifi_good', 'E08': 'a', 'E19': 'a', 'W01': 'a', 'E13': 'a', 'E15': 'b', 'D10': 'hard', 'E21': 'a', 'RIG': 'rig_fair', 'E16': 'transfer', 'E17': 'champion' } },
+  ];
+  console.log('\n=== 9 暴毙结局剧本可达性 ===');
+  for (const { target, fb, script } of deathScripts) {
+    const r = runScripted(target, script, fb);
+    if (r.ok) console.log(`  ✓ ${target.padEnd(14)} (seed ${r.seed}, ${r.steps} 步)`);
+    else { console.error(`  ✗ ${target} 300 个种子未达`); failed++; }
+  }
+  if (failed) { console.error(`\n${failed} 个结局不可达`); process.exit(1); }
+  console.log('9 个暴毙结局全部可达');
 }

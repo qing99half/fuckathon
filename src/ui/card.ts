@@ -24,6 +24,22 @@ export class CardView {
     bar.innerHTML = `<span>${escapeHtml(card.title)}</span><span class="dots"><i></i><i></i><i></i></span>`;
     el.appendChild(bar);
 
+    // 溯源标注：本卡是前面某个选择带来的后果（红条提示）
+    if (card.cause) {
+      const cz = document.createElement('div');
+      cz.className = 'card-cause';
+      cz.textContent = `▲ ${card.cause}`;
+      el.appendChild(cz);
+    }
+
+    // 暴毙卡：死亡率明示
+    if (card.deathRisk != null) {
+      const dr = document.createElement('div');
+      dr.className = 'card-deathrisk';
+      dr.textContent = `危机事件：处理不好，本届直接暴毙（硬扛死亡率 ${Math.round(card.deathRisk * 100)}%）`;
+      el.appendChild(dr);
+    }
+
     const body = document.createElement('div');
     body.className = 'card-body';
     body.textContent = card.body;
@@ -43,6 +59,8 @@ export class CardView {
       b.className = 'opt' + (card.options.length === 1 ? ' single' : '');
       const locked = !!o.cost && o.cost > money;
       if (locked) b.classList.add('locked');
+      // 受前面选择影响而产生的惩罚性选项：红边红底重点提示
+      if (o.warn) b.classList.add('warn');
       const label = document.createElement('span');
       label.textContent = o.label;
       b.appendChild(label);

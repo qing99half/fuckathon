@@ -133,8 +133,45 @@ img, canvas { image-rendering: pixelated; }
 .opt .preview { display: block; font-size: 11px; color: var(--blue); margin-top: 4px; font-family: var(--font-pixel-num); }
 .opt.locked { opacity: .5; cursor: not-allowed; background: #eee; }
 .opt.locked::after { content: '预算不足'; position: absolute; right: 10px; top: 10px; font-size: 11px; color: var(--red); font-family: var(--font-pixel-num); }
+/* 红标惩罚选项：前面选择的后果 */
+.opt.warn { border-color: var(--red); background: #FBEAEC; box-shadow: 3px 3px 0 rgba(200, 16, 46, .35); }
+.opt.warn .desc { color: #8a3040; }
 .opt .green-dot { position: absolute; right: 10px; top: 12px; width: 10px; height: 10px; background: var(--green); }
 .opt.single { text-align: center; font-size: 17px; }
+
+/* 溯源标注条（标题栏下方） */
+.card-cause {
+  background: var(--red); color: var(--paper); font-size: 12px; font-weight: 700;
+  padding: 5px 12px; letter-spacing: 1px;
+}
+/* 暴毙卡死亡率提示 */
+.card-deathrisk {
+  background: repeating-linear-gradient(45deg, #2b0a10 0 8px, #3d0e16 8px 16px);
+  color: #ffb3be; font-size: 12.5px; font-weight: 700; padding: 7px 12px; letter-spacing: 1px;
+}
+
+/* 震屏：大单/惩罚选项 */
+.stage.shake { animation: stageshake .45s; }
+@keyframes stageshake {
+  10% { transform: translate(-7px, 3px); }
+  25% { transform: translate(6px, -4px); }
+  40% { transform: translate(-5px, -2px); }
+  55% { transform: translate(4px, 3px); }
+  70% { transform: translate(-3px, 1px); }
+  85% { transform: translate(2px, -1px); }
+}
+
+/* 反馈卡数值变动行 */
+.fb-deltas {
+  display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
+  padding: 0 16px 16px;
+}
+.fb-delta {
+  font-family: var(--font-pixel-num); font-size: 11px; padding: 4px 8px;
+  border: 2px solid var(--ink); background: #fff;
+}
+.fb-delta.up { color: var(--green); }
+.fb-delta.down { color: var(--red); }
 
 /* ---------- 中央反馈卡 ---------- */
 .fb-wrap {

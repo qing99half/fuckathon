@@ -34,5 +34,11 @@
     "line": "（全程微笑点头，给所有队打一样的分）", "needsPatron": "gov" },
   { "id": "esports", "name": "退役电竞选手", "tag": "circle", "controllable": 0.3, "strictness": 0.3, "streamer": false,
     "flavor": "手速 300APM。主办方请来撑“年轻感”的。",
-    "line": "这比我打职业累。我睡了。" }
+    "line": "这比我打职业累。我睡了。" },
+  { "id": "intern", "name": "实习生评委", "tag": "circle", "controllable": 0.5, "strictness": 0.5, "streamer": false, "filler": true,
+    "flavor": "大三，来攒实践经历的。打分细则是在出租车上背的。",
+    "line": "老师，这个分数是越高越好吗？" },
+  { "id": "mc", "name": "主持人客串评委", "tag": "circle", "controllable": 0.6, "strictness": 0.4, "streamer": false, "filler": true,
+    "flavor": "昨晚刚背完主持稿，今天背评分表。主打一个嘴熟。",
+    "line": "这个队……很有台风！" }
 ]

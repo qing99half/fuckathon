@@ -16,8 +16,8 @@ import { A, ENDING_IMG, loadImg } from './ui/assets';
 
 const DEBUG = new URLSearchParams(location.search).has('debug');
 const AUTO = new URLSearchParams(location.search).has('auto');
+const STOPAT = new URLSearchParams(location.search).get('stopat'); // 冒烟测试：进入某阶段后停止自动点击
 const LS_ENDINGS = 'fuckathon.endings.v1';
-const LS_BONUS = 'fuckathon.nextBonus';
 
 const app = document.getElementById('app')!;
 const audio = new Audio8();
@@ -41,8 +41,8 @@ function unlockEnding(id: string) {
   if (!arr.includes(id)) { arr.push(id); localStorage.setItem(LS_ENDINGS, JSON.stringify(arr)); }
 }
 
-function toast(text: string, type: FbType = 'normal') {
-  feedback?.push(text, type);
+function toast(text: string, type: FbType = 'normal', deltas?: import('./ui/feedback').FbDelta[]) {
+  feedback?.push(text, type, deltas);
 }
 /** 按文案内容推断反馈卡类型 */
 function fbTypeOf(text: string): FbType {
@@ -73,7 +73,7 @@ async function showTitle() {
   const n = unlockedEndings().length;
   const btnGal = document.createElement('button');
   btnGal.className = 'px-btn ghost';
-  btnGal.textContent = `结局图鉴 ${n}/13`;
+  btnGal.textContent = `结局图鉴 ${n}/${ENDINGS.length}`;
   const dis = document.createElement('div');
   dis.className = 'title-disclaimer';
   dis.textContent = '本游戏纯属虚构。如有雷同，说明你也办过。';
@@ -92,7 +92,7 @@ function showGallery() {
   const g = document.createElement('div');
   g.className = 'gallery';
   const h = document.createElement('h2');
-  h.textContent = `结局图鉴 ${unlockedEndings().length}/13`;
+  h.textContent = `结局图鉴 ${unlockedEndings().length}/${ENDINGS.length}`;
   g.appendChild(h);
   const grid = document.createElement('div');
   grid.className = 'gallery-grid';
@@ -133,7 +133,6 @@ function showGallery() {
 // ---------- 游戏主循环 ----------
 function startGame() {
   app.innerHTML = '';
-  const bonus = Number(localStorage.getItem(LS_BONUS) ?? 0);
   engine = new GameEngine();
   hackCardsSeen = 0;
 
@@ -181,12 +180,6 @@ function startGame() {
     requestAnimationFrame(loop);
   };
   requestAnimationFrame(loop);
-
-  if (bonus > 0) {
-    localStorage.removeItem(LS_BONUS);
-    setTimeout(() => toast(`上届赞助商 CEO 续费到账 +¥${bonus.toLocaleString()}`, 'good'), 500);
-    engine.state.flags.pendingBonus = bonus;
-  }
 
   hud.update(engine.state);
   processEvents(engine.start());
@@ -254,12 +247,6 @@ function onPhase(phase: Phase) {
     case 'award': audio.bgm('award'); break;
     case 'hack': hackCardsSeen = 0; break;
   }
-  // 上届续费奖金到账（进入筹备期时）
-  if (phase === 'prep' && engine?.state.flags.pendingBonus) {
-    const b = Number(engine.state.flags.pendingBonus);
-    engine.state.money += b;
-    engine.state.flags.pendingBonus = 0;
-  }
 }
 
 function showCard() {
@@ -274,21 +261,36 @@ function showCard() {
   if (card.phase === 'judge') audio.bgm('judge');
   const autoMs = card.id.startsWith('DEMO_') ? 2600 : undefined;
   cardView.show(card, engine.state.money, (optionId) => {
-    audio.sfx('flip');
-    // 选后 footnote → 中央反馈卡；有反馈时下一张抉择卡延迟 300ms
+    const opt = card.options.find(o => o.id === optionId);
+    // 分级演出：大单（≥1万）或红标惩罚选项 → 震屏 + 重音
+    const heavy = (opt?.cost ?? 0) >= 10000 || !!opt?.warn;
+    if (heavy) {
+      const st = document.querySelector('.stage');
+      if (st) { st.classList.remove('shake'); void (st as HTMLElement).offsetWidth; st.classList.add('shake'); }
+      audio.sfx('thud');
+    } else {
+      audio.sfx('flip');
+    }
+    // 选前快照 → 立即结算 → 数值变动行
+    const before = { ...engine!.state };
+    const events = engine!.choose(optionId);
+    processEvents(events);
+    const after = engine!.state;
+    const deltas = (['money', 'buzz', 'gov', 'rep', 'chaos'] as const)
+      .map(k => ({ label: { money: '预算', buzz: '声量', gov: '政商', rep: '口碑', chaos: '混乱' }[k], delta: (after[k] as number) - (before[k] as number), money: k === 'money' }))
+      .filter(d => d.delta !== 0);
+    // 选后 footnote + 数值变动 → 中央反馈卡（与选项卡同款 UI）
     const ej = getEventCard(card.id);
-    const fn = ej ? eventFootnote(ej, optionId) : '';
-    if (fn) toast(fn, fbTypeOf(fn));
-    const run = () => {
-      if (!engine) return;
-      processEvents(engine.choose(optionId));
-    };
-    if (fn) setTimeout(run, 300); else run();
+    const fn = ej ? (eventFootnote(ej, optionId) ?? '') : '';
+    if (fn || deltas.length) {
+      toast(fn, fn ? fbTypeOf(fn) : 'normal', deltas.length ? deltas : undefined);
+    }
   }, autoMs);
   // ?auto=1 冒烟测试：自动随机点击选项
   if (AUTO) {
     setTimeout(() => {
       if (!engine || engine.currentCard()?.id !== card.id || engine.state.endingId) return;
+      if (STOPAT && engine.state.phase === STOPAT) return; // 停在指定阶段供截图
       const eng = engine;
       const pool = card.options.filter(o => !o.cost || o.cost <= eng.state.money);
       const pick = pool[Math.floor(Math.random() * pool.length)] ?? card.options[0];
@@ -306,10 +308,6 @@ async function onEnding(endingId: string) {
   if (!ending) return;
   const isNew = !unlockedEndings().includes(endingId);
   unlockEnding(endingId);
-  // E17 赞助商 CEO C 位 → 下局奖金
-  if (engine.state.flags.nextBonus) {
-    localStorage.setItem(LS_BONUS, String(engine.state.flags.nextBonus));
-  }
   audio.sfx(isNew ? 'unlock' : 'fanfare');
   cardView?.clear();
 
@@ -341,7 +339,7 @@ async function onEnding(endingId: string) {
   again.addEventListener('click', () => { audio.sfx('click'); startGame(); });
   const gal = document.createElement('button');
   gal.className = 'px-btn plain';
-  gal.textContent = `图鉴 ${unlockedEndings().length}/13`;
+  gal.textContent = `图鉴 ${unlockedEndings().length}/${ENDINGS.length}`;
   gal.addEventListener('click', () => { audio.sfx('click'); showGallery(); });
   const home = document.createElement('button');
   home.className = 'px-btn plain';

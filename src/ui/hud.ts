@@ -77,11 +77,42 @@ export class Hud {
     this.el.querySelectorAll<HTMLCanvasElement>('canvas.ic').forEach(draw);
   }
 
+  private shown = new Map<string, number>(); // 当前显示值（滚动动画用）
+  private animTimer: number | null = null;
+
+  private fmt(k: string, v: number): string {
+    if (k === 'money') return Math.abs(v) >= 10000 ? `¥${(v / 10000).toFixed(1)}万` : `¥${v}`;
+    return String(Math.round(v));
+  }
+
   update(s: { money: number; buzz: number; gov: number; rep: number; chaos: number; anger: number; risk: number; seed: string }) {
-    const set = (k: string, v: string) => { const el = this.vals.get(k); if (el && el.textContent !== v) el.textContent = v; };
-    set('money', s.money >= 10000 ? `¥${(s.money / 10000).toFixed(1)}万` : `¥${s.money}`);
-    set('buzz', String(s.buzz)); set('gov', String(s.gov));
-    set('rep', String(s.rep)); set('chaos', String(s.chaos));
+    const targets: Record<string, number> = { money: s.money, buzz: s.buzz, gov: s.gov, rep: s.rep, chaos: s.chaos };
+    // 数字滚动：旧值 → 新值 350ms 缓动
+    if (this.animTimer) { cancelAnimationFrame(this.animTimer); this.animTimer = null; }
+    const from = new Map<string, number>();
+    let needAnim = false;
+    for (const k of Object.keys(targets)) {
+      const cur = this.shown.get(k) ?? targets[k];
+      from.set(k, cur);
+      if (cur !== targets[k]) needAnim = true;
+    }
+    if (!needAnim) {
+      for (const k of Object.keys(targets)) this.vals.get(k)!.textContent = this.fmt(k, targets[k]);
+    } else {
+      const t0 = performance.now();
+      const stepFn = (now: number) => {
+        const p = Math.min(1, (now - t0) / 350);
+        const e = 1 - Math.pow(1 - p, 3); // easeOutCubic
+        for (const k of Object.keys(targets)) {
+          const v = from.get(k)! + (targets[k] - from.get(k)!) * e;
+          this.vals.get(k)!.textContent = this.fmt(k, Math.round(v));
+          if (p >= 1) this.shown.set(k, targets[k]);
+        }
+        if (p < 1) this.animTimer = requestAnimationFrame(stepFn);
+        else this.animTimer = null;
+      };
+      this.animTimer = requestAnimationFrame(stepFn);
+    }
     this.angerBar.style.width = `${Math.min(100, s.anger)}%`;
     const th = s.risk >= 70 ? ICON.thermoRed : s.risk >= 40 ? ICON.thermoYellow : ICON.thermoGreen;
     if (this.thermo.dataset.icon !== String(th)) {

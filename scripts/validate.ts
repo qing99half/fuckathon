@@ -40,9 +40,15 @@ for (const e of EVENT_CARDS) {
 }
 ok('字数检查完成');
 
-// 4. 结局表：priority 唯一且有兜底
-const prios = new Set(ENDINGS.map(e => e.priority));
-if (prios.size !== ENDINGS.length) err('结局 priority 有重复');
+// 4. 结局表：非暴毙结局 priority 唯一（暴毙结局共享 0，靠 deathId 区分）且有兜底
+const normalEndings = ENDINGS.filter(e => !(e as { death?: boolean }).death);
+const prios = new Set(normalEndings.map(e => e.priority));
+if (prios.size !== normalEndings.length) err('结局 priority 有重复');
+const deathEndings = ENDINGS.filter(e => (e as { death?: boolean }).death);
+for (const d of deathEndings) {
+  if (d.priority !== 0) err(`暴毙结局 ${d.id} priority 必须为 0`);
+  if (!d.when.deathId) err(`暴毙结局 ${d.id} 缺 deathId 条件`);
+}
 if (!ENDINGS.some(e => Object.keys(e.when).length === 0)) err('结局缺兜底（when 为空）');
 const noSet = new Set(ENDINGS.map(e => e.no));
 if (noSet.size !== ENDINGS.length) err('结局红头文号重复');
@@ -52,8 +58,8 @@ ok(`结局 ${ENDINGS.length} 张，兜底存在`);
 for (const t of ['A', 'B', 'C'] as const) {
   if (BARRAGES[t].length < 15) err(`弹幕 ${t} 档不足 15 条`);
 }
-const linkedUsed = ['meal_15', 'meal_60', 'wifi_bad', 'speech_dead', 'award_token',
-  'rig_fair', 'rig_rigged', 'rig_water', 'sponsor_3', 'sponsor_5', 'sponsor_0', 'bloat', 'inflation'];
+const linkedUsed = ['meal_15', 'meal_60', 'wifi_bad', 'wifi_hotspot', 'lodge_none', 'speech_dead', 'award_token',
+  'rig_fair', 'rig_rigged', 'rig_water', 'sponsor_3', 'sponsor_5', 'sponsor_0', 'bloat', 'bloat_cut', 'inflation', 'hard_carry'];
 for (const k of linkedUsed) {
   if (!BARRAGES.linked[k]?.length) err(`联动弹幕 ${k} 缺失`);
 }

@@ -13,6 +13,7 @@ export interface Option {
   effects: Effects;
   setFlags?: Record<string, string | number | boolean>;
   conscienceMark?: boolean; // 良心绿点
+  warn?: boolean;         // 危险选项：红边红底
 }
 
 export interface Card {
@@ -23,6 +24,8 @@ export interface Card {
   footnote?: string;      // 小字梗
   options: Option[];
   speaker?: string;       // 用于评委亮相等
+  cause?: string;         // 后果溯源标注："签下 3 家冠名的后果"
+  deathRisk?: number;     // 暴毙抢救卡：硬扛死亡率（0-1）
 }
 
 export type Phase =

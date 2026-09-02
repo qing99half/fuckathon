@@ -2,7 +2,7 @@
 import type { Card, RunState, ViewEvent } from './types';
 import { Rng, hashSeed, makeSeed } from './rng';
 import { applyEffects, applyFlags } from './effects';
-import { deckNext, buildE20, sponsorAmt, govRelated } from './deck';
+import { deckNext, buildE20, sponsorAmt, govRelated, DEATHS, buildDeathCard, buildE24 } from './deck';
 import { matchEnding, repFinalOf } from './ending';
 import { SPONSORS, PATRONS, TITLE_TIERS, JUDGES, BARRAGES, HYPES, getEventCard, eventToCard, mainCopy } from './data';
 
@@ -99,12 +99,23 @@ export class GameEngine {
       s.flags.warned = true;
       const w = mainCopy('W01');
       s.queue.unshift({
-        id: 'W01', phase: 'hack', title: w.title, body: w.body,
+        id: 'W01', phase: 'hack', title: w.title, body: w.body, cause: '怨气压不住的后果',
         options: [
           { id: 'a', label: '现场发补贴 · ¥3000', cost: 3000, preview: '预算 -3000', conscienceMark: true, effects: { money: -3000, anger: -15, conscience: 5 } },
-          { id: 'b', label: '让主持人讲个笑话', effects: { risk: 5 } },
+          { id: 'b', label: '让主持人讲个笑话', effects: { risk: 5 }, warn: true },
         ],
       });
+    }
+
+    // 6.5 暴毙抢救窗口触发（条件满足 → 红卡插队；硬扛才 roll 死）
+    this.checkDeathTriggers(card.id, optionId, out);
+
+    // 6.6 热搜第一强制事件（risk≥80，一局一次）
+    if (s.risk >= 80 && !s.flags.e24 && !s.exposed && !s.flags.deathId) {
+      s.flags.e24 = true;
+      s.queue.unshift(buildE24());
+      out.push({ kind: 'riskflash', level: 'red' });
+      out.push({ kind: 'sfx', name: 'alarm' });
     }
 
     // 7. 推进
@@ -143,6 +154,15 @@ export class GameEngine {
     }
     const cur = this.currentCard();
     if (cur) {
+      // 良心 <20：良心选项（绿点）从卡面消失
+      if (s.conscience < 20 && cur.options.length > 1 && cur.options.some(o => o.conscienceMark)) {
+        cur.options = cur.options.filter(o => !o.conscienceMark);
+      }
+      // 退赛潮提示
+      if (cur.id === 'JINTRO' && s.flags.withdrawalWave && !s.flags.withdrawalToasted) {
+        s.flags.withdrawalToasted = true;
+        out.push({ kind: 'toast', text: '退赛潮：两支队伍连夜退赛，路演缩水' });
+      }
       // 卡面入场附带回响
       if (cur.id === 'SP_SUM' && s.sponsors.length === 0 && BARRAGES.linked.sponsor_0) {
         out.push({ kind: 'barrage', lines: BARRAGES.linked.sponsor_0 });
@@ -284,20 +304,73 @@ export class GameEngine {
       if (optionId === 'process') s.flags.delayedPay = true;
       return;
     }
-    if (cardId === 'E17' && optionId === 'ceo') s.flags.nextBonus = 50000;
     if (cardId === 'E23') s.flags.cryptoCrash = true;
+
+    // 暴毙抢救卡结算
+    const dDef = DEATHS.find(d => d.id === cardId);
+    if (dDef) {
+      if (optionId === 'hard') {
+        if (this.rng.next() < dDef.dieRate) {
+          // 死亡：清空队列直接进结局
+          s.flags.deathId = dDef.deathId;
+          s.queue.length = 0;
+          s.flags.stage = 'done';
+          out.push({ kind: 'riskflash', level: 'red' });
+          out.push({ kind: 'sfx', name: 'alarm' });
+        } else {
+          this.fx(out, { rep: 5, buzz: 5 });
+          out.push({ kind: 'toast', text: '你赌赢了。这次。' });
+        }
+      } else {
+        out.push({ kind: 'toast', text: optionId === 'pay' ? '破财免灾。钱没了，命还在。' : '认怂保平安。姿态放低，事情就过去了。' });
+      }
+      return;
+    }
+
+    // 热搜第一：律师函 50/50
+    if (cardId === 'E24' && optionId === 'lawyer') {
+      if (this.rng.chance(0.5)) {
+        this.fx(out, { rep: 10, buzz: 5, risk: -40 });
+        out.push({ kind: 'toast', text: '对方删帖道歉。律师函居然有用。' });
+      } else {
+        this.fx(out, { rep: -20, risk: 10 });
+        out.push({ kind: 'toast', text: '律师函被做成表情包，转发 3 万。' });
+      }
+      return;
+    }
   }
 
+  /** 暴毙抢救窗口触发（选项驱动型：D4/D6/D7/D8/D10） */
+  private checkDeathTriggers(cardId: string, optionId: string, out: ViewEvent[]) {
+    const s = this.state;
+    if (s.flags.deathId) return;
+    const pushD = (id: string) => {
+      if (s.flags[`fired_${id}`]) return;
+      s.flags[`fired_${id}`] = true;
+      const def = DEATHS.find(d => d.id === id)!;
+      s.queue.unshift(buildDeathCard(def));
+      out.push({ kind: 'riskflash', level: 'yellow' });
+      out.push({ kind: 'sfx', name: 'alarm' });
+    };
+    if (cardId === 'W01' && optionId === 'b' && s.anger >= 90) pushD('D4');
+    if (cardId === 'E08' && optionId === 'b') pushD('D6');
+    if (cardId === 'E19' && s.patronId === 'gov' && s.chaos >= 6) pushD('D7');
+    if (cardId === 'E21' && optionId === 'c' && s.chaos >= 6) pushD('D8');
+    if (cardId === 'E15' && optionId === 'b' && s.buzz >= 70) pushD('D10');
+  }
   /** 联动弹幕键映射 */
   private linkedKeyOf(cardId: string, optionId: string): string | null {
     if (cardId === 'MEAL' && optionId === 'meal_15') return 'meal_15';
     if (cardId === 'MEAL' && optionId === 'meal_60') return 'meal_60';
     if (cardId === 'WIFI' && optionId === 'wifi_bad') return 'wifi_bad';
+    if (cardId === 'LODGE' && optionId === 'lodge_none') return 'lodge_none';
     if (cardId === 'E07' && optionId === 'b') return 'speech_dead';
+    if (cardId === 'E08' && optionId === 'b') return 'wifi_hotspot';
     if (cardId === 'E16' && optionId === 'token') return 'award_token';
     if (cardId === 'RIG') return optionId; // rig_fair / rig_rigged / rig_water
-    if (cardId === 'E19') return 'bloat';
+    if (cardId === 'E19') return optionId === 'b' ? 'bloat_cut' : 'bloat';
     if (cardId === 'E22' && optionId === 'a') return 'inflation';
+    if (/^D\d+$/.test(cardId) && optionId === 'hard') return 'hard_carry';
     return null;
   }
 

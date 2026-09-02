@@ -9,7 +9,15 @@
     "player_glasses": 6,
     "player_hardware": 8,
     "player_hoodie": 9,
-    "player_pm": 6
+    "player_pm": 6,
+    "station_0": 5,
+    "station_1": 5,
+    "station_2": 5,
+    "station_3": 5,
+    "station_4": 5,
+    "station_5": 5,
+    "station_6": 5,
+    "station_7": 5
   },
   "tiles": 45,
   "icons": 36,
