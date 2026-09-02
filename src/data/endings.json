@@ -1,90 +1,262 @@
 [
-  { "id": "die_sunge", "no": 14, "title": "被孙割割了", "priority": 0, "death": true,
-    "when": { "deathId": "die_sunge" },
-    "text": "颁奖典礼取消了。孙割在朋友圈晒了马尔代夫，配文“感恩社区”。你数了数合同，发现连违约金都是代币计价。",
-    "comments": "链上风光，链下跑路。\n你的赞助已上链，你的尾款已下海。" },
-  { "id": "die_cognition", "no": 15, "title": "认知偏差了", "priority": 0, "death": true,
-    "when": { "deathId": "die_cognition" },
-    "text": "求真团扒出了你历届通稿。“500 人大赛，37 个真人，30 个是气氛组”——剩下的 7 个，现在也在退赛群里。",
-    "comments": "求真团的结论：数据有认知偏差。\n你的认知，偏差得比较大。" },
-  { "id": "die_runaway", "no": 16, "title": "跑路了兄弟", "priority": 0, "death": true,
-    "when": { "deathId": "die_runaway" },
-    "text": "凌晨三点，选手集体离场。你站在空荡荡的赛场，只有易拉宝还立着。保洁问你：这些盒饭还要吗？",
-    "comments": "全场最忠诚的是那 40 份凉泡面。\n它们哪也没去。" },
-  { "id": "die_meal", "no": 17, "title": "我记得华莱士没赞助啊", "priority": 0, "death": true,
-    "when": { "deathId": "die_meal" },
-    "text": "120 的鸣笛声是本届比赛最出圈的声音。医院输液室里，选手们自发拉了第二个群——没有你的那种。",
-    "comments": "华莱士连夜发声明：与本届比赛无关。\n这是他们本年度最快的公关。" },
-  { "id": "die_power", "no": 18, "title": "物理黑客来了", "priority": 0, "death": true,
-    "when": { "deathId": "die_power" },
-    "text": "全馆跳闸的那一刻，47 个手机屏幕同时亮起，像一片星海。这是本届最有技术含量的画面。",
-    "comments": "物业在群里发了两个字：拉闸。\n配了一个微笑表情。" },
-  { "id": "die_leader", "no": 19, "title": "组织研究决定", "priority": 0, "death": true,
-    "when": { "deathId": "die_leader" },
-    "text": "领导只说了六个字：“以后不要办了。”散会后，秘书把背景板上的领导名字连夜抠掉了。",
-    "comments": "六个字，没有标点。\n但你读出了叹号。" },
-  { "id": "die_fight", "no": 20, "title": "我说这是搏击松有没有懂的", "priority": 0, "death": true,
-    "when": { "deathId": "die_fight" },
-    "text": "两位评委从“商业价值”打到了“物理价值”。直播切片标题：《评委席 MMA·全球总决赛》——比你办的所有比赛都火。",
-    "comments": "自由搏击，评委先行。\n选手表示这是他们看过最好的路演。" },
-  { "id": "die_screen", "no": 21, "title": "我chovy，投屏给我投好的啊", "priority": 0, "death": true,
-    "when": { "deathId": "die_screen" },
-    "text": "《内定名单-final-真不改了.pptx》在 100 寸大屏上停留了整整 40 秒。台下安静得能听见侄子的呼吸声。",
-    "comments": "投屏老师手很稳。\n稳得像故意的。" },
-  { "id": "die_ban", "no": 22, "title": "全网恩人（已封禁）", "priority": 0, "death": true,
-    "when": { "deathId": "die_ban" },
-    "text": "直播间封禁前最后一帧，弹幕齐刷刷刷着“谢谢主办方的乐子”。你成了全网恩人，以封禁的方式。",
-    "comments": "你最后说的话是“家人们”。\n家人们确实都在。" },
-  { "id": "exposed", "no": 3, "title": "10w+ 长文曝光", "priority": 1,
-    "when": { "exposed": true, "apologized": false },
-    "text": "那篇长文你逐字读完了。写得真好，你甚至想转发。",
-    "comments": "长文 10w+，你的回应 800 阅读。\n其中 600 是你自己点的。" },
-  { "id": "spring", "no": 6, "title": "春风", "priority": 2,
-    "when": { "conscience": ">=70", "rep": ">=80", "money": "<=30000", "exposed": false },
-    "text": "三个月后，另一个城市的学生照着你的复盘文档，办了一场免费的黑客松。他们管那个文档叫 Playbook。",
-    "comments": "有选手留言：“虽然穷，但盒饭是热的。”\n你把这条评论截了图，设成了壁纸。" },
-  { "id": "sincere", "no": 5, "title": "意外真诚", "priority": 3,
-    "when": { "conscience": ">=60", "money": "<=10000", "exposed": false },
-    "text": "你亏了三万。但决赛那晚，40 个选手走的时候，每个人都在群里说了声谢谢。",
-    "comments": "你亏了三万。\n但选手群的名片备注，从“主办方”变成了“哥”。" },
-  { "id": "withdrawal", "no": 12, "title": "戒断反应", "priority": 4,
-    "when": { "conscience": ">=50", "rep": ">=70" },
-    "text": "散场后第三天，你还是会梦见键盘声。有人说这是病，选手们说这叫戒断反应。",
-    "comments": "医生说这是正常现象。\n患者主要是办黑客松的。" },
-  { "id": "token", "no": 7, "title": "代币归零", "priority": 5,
-    "when": { "awardMode": "token" },
-    "text": "奖金归零那天，获奖选手找你，你说“我也亏了”。你们都对，这就是 Web3。",
-    "comments": "钱包里多了一笔文物。\n博物馆不要的那种。" },
-  { "id": "nephew", "no": 8, "title": "侄子登基", "priority": 6,
-    "when": { "rigChoice": "rigged", "exposed": false },
-    "text": "冠军发表获奖感言：“感谢这个平台。”台下掌声礼貌而漫长，像一场默哀。",
-    "comments": "侄子的获奖感言背得很熟。\n比他的代码熟。" },
-  { "id": "annual", "no": 13, "title": "赞助商年会", "priority": 7,
-    "when": { "sponsorCount": ">=6", "exposed": false },
-    "text": "领导致辞时说了三次“感谢主办方”，但你数了，台上站着的全是赞助商。包括你——你也是来蹭的。",
-    "comments": "年会很成功。\n比赛是年会的一部分。" },
-  { "id": "balance", "no": 9, "title": "端水艺术家", "priority": 8,
-    "when": { "awardInflation": true },
-    "text": "12 个奖，8 支队，人人都有光明的未来。评委打分表后来被裱起来，挂在厕所。",
-    "comments": "端水是一门艺术。\n你端的是赞助商的水，选手喝的是西北风。" },
-  { "id": "grifter", "no": 11, "title": "刷奖团之王", "priority": 9,
-    "when": { "grifterAction": "allied" },
-    "text": "你的比赛成了刷奖团全国巡演的一站。他们给你的备注是：好说话，奖项多。",
-    "comments": "他们给你寄了面锦旗。\n上面写着：下一站见。" },
-  { "id": "leaderhappy", "no": 10, "title": "领导满意", "priority": 10,
-    "when": { "gov": ">=90" },
-    "text": "领导表示明年还要办，规模翻十倍。你看着银行卡余额，开始连夜学习《如何婉拒领导》。",
-    "comments": "领导很满意。\n你连夜开始学习《婉拒的艺术》。" },
-  { "id": "prefab", "no": 1, "title": "预制菜大师", "priority": 11,
-    "when": { "buzz": ">=80", "rep": "<=30", "exposed": false },
-    "text": "你的黑客松被做成了教学案例——在 MBA 的危机公关课上。",
-    "comments": "MBA 课堂反响热烈。\n案例作者匿名，但所有人都知道是谁。" },
-  { "id": "nobody", "no": 4, "title": "无人伤亡", "priority": 12,
-    "when": { "buzz": "<30" },
-    "text": "比赛结束了，没人知道它开始过。通稿阅读量 312，其中 300 是你刷的。",
-    "comments": "通稿阅读 312。\n比上届多 12，进步显著。" },
-  { "id": "smooth", "no": 2, "title": "圆满交差", "priority": 13,
+  {
+    "id": "die_sunge",
+    "no": 14,
+    "title": "被孙割割了",
+    "priority": 0,
+    "death": true,
+    "when": {
+      "deathId": "die_sunge"
+    },
+    "text": "颁奖典礼取消。孙割在朋友圈晒马尔代夫，配文\"感恩社区\"。你翻开合同：违约金以代币计价，代币已归零。你被写进了他的成功案例 PPT。",
+    "comments": "链上风光，链下跑路。\n你的赞助已上链，你的尾款已下海。"
+  },
+  {
+    "id": "die_cognition",
+    "no": 15,
+    "title": "认知偏差了",
+    "priority": 0,
+    "death": true,
+    "when": {
+      "deathId": "die_cognition"
+    },
+    "text": "求真团扒出你历届通稿：\"500 人大赛，37 个真人，30 个气氛组\"。你回应\"统计口径存在认知偏差\"——这句话也成了梗。这是你对中文互联网唯一的贡献。",
+    "comments": "求真团的结论：数据有认知偏差。\n你的认知，偏差得比较大。"
+  },
+  {
+    "id": "die_runaway",
+    "no": 16,
+    "title": "跑路了兄弟",
+    "priority": 0,
+    "death": true,
+    "when": {
+      "deathId": "die_runaway"
+    },
+    "text": "凌晨三点选手集体离场。你站在空赛场，只有易拉宝还立着——毕竟它是预付的。保洁问盒饭还要吗，你说要。这是你本届唯一的收获。",
+    "comments": "全场最忠诚的是那 40 份凉泡面。\n它们哪也没去。"
+  },
+  {
+    "id": "die_meal",
+    "no": 17,
+    "title": "我记得华莱士没赞助啊",
+    "priority": 0,
+    "death": true,
+    "when": {
+      "deathId": "die_meal"
+    },
+    "text": "120 的鸣笛是本届最出圈的声音。输液室里选手拉了新群：\"黑客松受害者互助会（总群）\"。你连分群都没进去。",
+    "comments": "华莱士连夜发声明：与本届比赛无关。\n这是他们本年度最快的公关。"
+  },
+  {
+    "id": "die_power",
+    "no": 18,
+    "title": "物理黑客来了",
+    "priority": 0,
+    "death": true,
+    "when": {
+      "deathId": "die_power"
+    },
+    "text": "全馆跳闸那一刻，47 个手机屏幕同时亮起，像一片星海——本届技术含量最高的画面。供电公司通报：电缆是被人剪的，手法专业，比你懂技术。",
+    "comments": "物业在群里发了两个字：拉闸。\n配了一个微笑表情。"
+  },
+  {
+    "id": "die_leader",
+    "no": 19,
+    "title": "组织研究决定",
+    "priority": 0,
+    "death": true,
+    "when": {
+      "deathId": "die_leader"
+    },
+    "text": "领导只说了六个字：\"以后不要办了。\"散会后秘书连夜抠掉背景板上的名字。你被移出群聊的速度，比你建群还快。",
+    "comments": "六个字，没有标点。\n但你读出了叹号。"
+  },
+  {
+    "id": "die_fight",
+    "no": 20,
+    "title": "我说这是搏击松有没有懂的",
+    "priority": 0,
+    "death": true,
+    "when": {
+      "deathId": "die_fight"
+    },
+    "text": "两位评委从\"商业价值\"打到\"物理价值\"。直播切片《评委席 MMA·全球总决赛》播放 200 万——你办赛三天，不如评委三分钟。",
+    "comments": "自由搏击，评委先行。\n选手表示这是他们看过最好的路演。"
+  },
+  {
+    "id": "die_screen",
+    "no": 21,
+    "title": "我chovy，投屏给我投好的啊",
+    "priority": 0,
+    "death": true,
+    "when": {
+      "deathId": "die_screen"
+    },
+    "text": "《内定名单-final-真不改了-最终版.pptx》在 100 寸大屏上停了整整 40 秒。台下安静得能听见侄子的呼吸——他后来才知道，冠军原本是他。",
+    "comments": "投屏老师手很稳。\n稳得像故意的。"
+  },
+  {
+    "id": "die_ban",
+    "no": 22,
+    "title": "全网恩人（已封禁）",
+    "priority": 0,
+    "death": true,
+    "when": {
+      "deathId": "die_ban"
+    },
+    "text": "封禁前最后一帧，弹幕齐刷\"谢谢主办方的乐子\"。你的直播生涯 47 分钟，录播永远流传。全网恩人，已封禁。",
+    "comments": "你最后说的话是“家人们”。\n家人们确实都在。"
+  },
+  {
+    "id": "exposed",
+    "no": 3,
+    "title": "10w+ 长文曝光",
+    "priority": 1,
+    "when": {
+      "exposed": true,
+      "apologized": false
+    },
+    "text": "那篇 10w+ 你逐字读完了，写得比你的通稿好。你点了个赞，取消了，又从收藏里取消了。",
+    "comments": "长文 10w+，你的回应 800 阅读。\n其中 600 是你自己点的。"
+  },
+  {
+    "id": "spring",
+    "no": 6,
+    "title": "春风",
+    "priority": 2,
+    "when": {
+      "conscience": ">=70",
+      "rep": ">=80",
+      "money": "<=30000",
+      "exposed": false
+    },
+    "text": "三个月后，另一座城市的学生照你的复盘文档办了场免费黑客松，场场爆满。文档署名栏写着你的名字——没人拼对。",
+    "comments": "有选手留言：“虽然穷，但盒饭是热的。”\n你把这条评论截了图，设成了壁纸。"
+  },
+  {
+    "id": "sincere",
+    "no": 5,
+    "title": "意外真诚",
+    "priority": 3,
+    "when": {
+      "conscience": ">=60",
+      "money": "<=10000",
+      "exposed": false
+    },
+    "text": "你亏了三万。散场那晚选手挨个说谢谢，有人给你留了罐咖啡，拉环上贴着纸条：明年别亏这么多。",
+    "comments": "你亏了三万。\n但选手群的名片备注，从“主办方”变成了“哥”。"
+  },
+  {
+    "id": "withdrawal",
+    "no": 12,
+    "title": "戒断反应",
+    "priority": 4,
+    "when": {
+      "conscience": ">=50",
+      "rep": ">=70"
+    },
+    "text": "散场第三天你还在梦见键盘声。医生说是病，选手说是戒断反应。只有你知道，那是 47 个人的怨念在回荡。",
+    "comments": "医生说这是正常现象。\n患者主要是办黑客松的。"
+  },
+  {
+    "id": "token",
+    "no": 7,
+    "title": "代币归零",
+    "priority": 5,
+    "when": {
+      "awardMode": "token"
+    },
+    "text": "奖金归零那天选手来找你。你说我也亏了。你们相视一笑，然后互相拉黑。这就是 Web3 的共识机制。",
+    "comments": "钱包里多了一笔文物。\n博物馆不要的那种。"
+  },
+  {
+    "id": "nephew",
+    "no": 8,
+    "title": "侄子登基",
+    "priority": 6,
+    "when": {
+      "rigChoice": "rigged",
+      "exposed": false
+    },
+    "text": "冠军的获奖感言是\"感谢这个平台\"，台下掌声礼貌而漫长。他的 PPT 最后一页忘了删：舅，这样写行吗？",
+    "comments": "侄子的获奖感言背得很熟。\n比他的代码熟。"
+  },
+  {
+    "id": "annual",
+    "no": 13,
+    "title": "赞助商年会",
+    "priority": 7,
+    "when": {
+      "sponsorCount": ">=6",
+      "exposed": false
+    },
+    "text": "领导致辞三次感谢主办方，台上站的全是赞助商。你也在台上——负责递话筒。合影里只剩你半只手。",
+    "comments": "年会很成功。\n比赛是年会的一部分。"
+  },
+  {
+    "id": "balance",
+    "no": 9,
+    "title": "端水艺术家",
+    "priority": 8,
+    "when": {
+      "awardInflation": true
+    },
+    "text": "12 个奖，8 支队，人人都有光明的未来。评委打分表后来被裱起来挂在厕所——它值得，它让每个人都通畅。",
+    "comments": "端水是一门艺术。\n你端的是赞助商的水，选手喝的是西北风。"
+  },
+  {
+    "id": "grifter",
+    "no": 11,
+    "title": "刷奖团之王",
+    "priority": 9,
+    "when": {
+      "grifterAction": "allied"
+    },
+    "text": "你的比赛入选刷奖团年度巡演\"友好站点\"，评语：好说话，奖项多，管饭（名义上）。奖杯是回收的——上一站也是这么来的。",
+    "comments": "他们给你寄了面锦旗。\n上面写着：下一站见。"
+  },
+  {
+    "id": "leaderhappy",
+    "no": 10,
+    "title": "领导满意",
+    "priority": 10,
+    "when": {
+      "gov": ">=90"
+    },
+    "text": "领导表示明年规模翻十倍。你连夜研读《婉拒的艺术》，发现作者简介写着：前黑客松主办方。",
+    "comments": "领导很满意。\n你连夜开始学习《婉拒的艺术》。"
+  },
+  {
+    "id": "prefab",
+    "no": 1,
+    "title": "预制菜大师",
+    "priority": 11,
+    "when": {
+      "buzz": ">=80",
+      "rep": "<=30",
+      "exposed": false
+    },
+    "text": "你的比赛被写进了 MBA 危机公关教材，章节名《流水线翻车：从预制到预制碑》。课后作业是\"找出主办方做对的一件事\"。历年平均分：零。",
+    "comments": "MBA 课堂反响热烈。\n案例作者匿名，但所有人都知道是谁。"
+  },
+  {
+    "id": "nobody",
+    "no": 4,
+    "title": "无人伤亡",
+    "priority": 12,
+    "when": {
+      "buzz": "<30"
+    },
+    "text": "比赛结束半个月，你在电梯里跟人提起它。对方问：哪个比赛？你说上个月那个。对方说：哦。全程十二层楼，没人再说一句话。",
+    "comments": "通稿阅读 312。\n比上届多 12，进步显著。"
+  },
+  {
+    "id": "smooth",
+    "no": 2,
+    "title": "圆满交差",
+    "priority": 13,
     "when": {},
-    "text": "领导在总结会上表扬了你三次，赞助商续约了。只有选手群沉默了，但选手群不重要，对吧？",
-    "comments": "媒体称“超出预期”。\n只有你知道，预期是你自己写的。" }
+    "text": "复盘会上领导表扬了你三次，赞助商当场续约。选手群静得像墓群。没人通知他们复盘——预制菜不需要知道自己是菜。",
+    "comments": "媒体称“超出预期”。\n只有你知道，预期是你自己写的。"
+  }
 ]

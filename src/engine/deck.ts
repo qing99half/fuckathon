@@ -206,8 +206,15 @@ function stageJudgeBuild(s: RunState, rng: Rng): Card[] {
     if (!cand.length) break;
     for (const j of cand) offered.add(j.id);
     seatNo++;
-    cards.push(M('JD', 'prep', cand.map(j =>
-      O(`judge_${j.id}`, `${j.name}｜${j.tag}`, {}, { desc: j.flavor })), { n: seatNo }));
+    // 评委出场费：名人收费，情怀/凑数免费；预算不足置灰
+    cards.push(M('JD', 'prep', cand.map(j => {
+      const fee = j.fee ?? 0;
+      return O(`judge_${j.id}`, fee ? `${j.name}｜${j.tag} · ¥${fee.toLocaleString()}` : `${j.name}｜${j.tag}`,
+        fee ? { money: -fee } : {},
+        fee
+          ? { cost: fee, preview: `出场费 -${fee}`, desc: j.flavor }
+          : { desc: `${j.flavor}\n（不要钱，要情怀）` });
+    }), { n: seatNo }));
     cards[cards.length - 1].id = `JD_${seatNo}`;
   }
   return cards;
@@ -274,7 +281,18 @@ function stageDeadline(): Card[] {
 
 function stageJudgeIntro(s: RunState): Card[] {
   const lines = s.judges.map(j => `【${j.name}】“${j.line}”`).join('\n');
-  return [M('JINTRO', 'judge', [O('next', '开始路演', {})], { lines })];
+  // 评审宴请三档：后期花销口
+  return [M('JINTRO', 'judge', [
+    O('cater_0', '工作餐（盒饭同款）', {}, { desc: '评委和选手第一次实现了平等。' }),
+    O('cater_1', '评审宴 · ¥8000', { money: -8000, rep: 5, gov: 5 }, {
+      cost: 8000, preview: '预算 -8000 · 口碑 +5 · 政商 +5',
+      desc: '评委吃得不错。打分的手会不会软一点？不会，但气氛到了。',
+    }),
+    O('cater_2', '评审宴+伴手礼 · ¥20000', { money: -20000, rep: 10, gov: 8 }, {
+      cost: 20000, preview: '预算 -20000 · 口碑 +10 · 政商 +8',
+      desc: '伴手礼是赞助商试用装。等于没花钱——但账上确实少了。',
+    }),
+  ], { lines })];
 }
 
 function stageDemos(s: RunState, rng: Rng): Card[] {

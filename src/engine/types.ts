@@ -44,6 +44,7 @@ export interface Judge {
   id: string; name: string; tag: string;
   controllable: number; strictness: number; streamer: boolean;
   flavor: string; line: string;
+  fee?: number;          // 出场费（¥，0=情怀免费）
 }
 
 export interface Team {
