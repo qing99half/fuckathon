@@ -154,7 +154,18 @@ function stageVenue(s: RunState): Card[] {
   ], undefined, govCoupon ? '你有管委会给的场地券，但产业园本来就免费——券留作纪念。' : undefined)];
 }
 
-function stageMeal(): Card[] {
+function stageMeal(s: RunState): Card[] {
+  // B1 强制绑定：签了丑团"独家供餐"（且非结盟）→ 餐标三选一被锁成丑团套餐三档
+  const pff = s.sponsors.find(x => x.id === 'pff');
+  if (pff && !pff.allied) {
+    return [C('MEAL_PFF', 'prep', '供餐方案（已被锁定）',
+      '你打开订餐后台才发现：签了丑团"独家供餐"，餐标这件事你已经没有发言权了。丑团商务发来三档套餐，笑容可掬。',
+      [
+        O('pff_std', '满 25 减 2 标准餐', { anger: 10 }, { desc: '选手的计算器按得比键盘还响。' }),
+        O('pff_plus', '加钱升级"热乎餐" · ¥6000', { money: -6000, anger: 4 }, { cost: 6000, preview: '预算 -6000', desc: '多花六千，从"难吃"升级到"难吃但热乎"。' }),
+        O('pff_sneak', '睁一只眼，放外卖进场', { risk: 5, anger: -3 }, { warn: true, desc: '丑团督导在场边数人头，你假装没看见。' }),
+      ])];
+  }
   return [M('MEAL', 'prep', [
     O('meal_15', '15 元“生命体征维持餐”', { anger: 20 }, { desc: '米饭管够，鸡腿看命。' }),
     O('meal_30', '30 元“有两块肉” · ¥8000', { money: -8000, anger: 5 }, { cost: 8000, preview: '预算 -8000', desc: '选手会拍照发朋友圈，配文：还行。' }),
@@ -186,14 +197,28 @@ function stageLodging(): Card[] {
 function stageJudgeBuild(s: RunState, rng: Rng): Card[] {
   const seatSponsors = s.sponsors.filter(x => x.judgeSeat && !x.allied);
   const auto: Judge[] = [];
-  for (const sp of seatSponsors) {
-    const jid = sp.id === 'suyun' ? 'exec' : sp.id === 'yuzhou' ? 'kol' : null;
+  const pushAuto = (jid: string | null): boolean => {
     const j = JUDGES.find(x => x.id === jid);
-    if (j && !auto.some(a => a.id === j.id)) auto.push(j);
+    if (j && !auto.some(a => a.id === j.id)) { auto.push(j); return true; }
+    return false;
+  };
+  for (const sp of seatSponsors) {
+    pushAuto(sp.id === 'suyun' ? 'exec' : sp.id === 'yuzhou' ? 'kol' : null);
   }
+  // 金主强占席位（签约条件里写死的"安排"，玩家不能踢、不花出场费）
+  let patronSeats = 0;
+  if (s.patronId === 'corp') for (const jid of ['exec', 'intern']) { if (pushAuto(jid)) patronSeats++; }
+  if (s.patronId === 'crypto') { if (pushAuto('kol')) patronSeats++; }
+  if (s.patronId === 'gov') { if (pushAuto('leaderfriend')) patronSeats++; }
+  // 强占席位真实入座（修复：此前赞助席位只写在文案里，从没进过评委名单）
+  for (const j of auto) if (!s.judges.some(x => x.id === j.id)) s.judges.push(j);
   const slots = Math.min(5 + auto.length, 9);
   const offered = new Set(auto.map(j => j.id)); // 已出现的评委不再进入后续候选（排重 bug 修复）
-  const autoText = auto.length ? `其中 ${auto.length} 席，赞助商已经“安排”好了。` : '全部席位你说了算。';
+  const spSeats = auto.length - patronSeats;
+  const autoText = auto.length
+    ? [spSeats ? `${spSeats} 席赞助商已经"安排"好了` : '', patronSeats ? `${patronSeats} 席金主已经"安排"好了` : '']
+      .filter(Boolean).join('，') + '。你主要负责鼓掌。'
+    : '全部席位你说了算。';
   const cards: Card[] = [
     M('JHEAD', 'prep', [O('next', '开始摇人', {})], { slots, auto: autoText }),
   ];
@@ -369,19 +394,28 @@ function stageAward(s: RunState, rng: Rng): Card[] {
     out.push(buildDeathCard(DEATHS.find(d => d.id === 'D2')!));
   }
   if (s.patronId === 'crypto' && !s.flags.cryptoCrash && !s.flags.deathId && rng.chance(0.3)) {
-    out.push(M('E23', 'award', [O('next', '……', { money: -60000 })], undefined));
+    // 尾款 30% 跑路：按金主实际金额动态计算（R4 修复写死的 -60000）
+    const cut = Math.round((PATRONS.find(p => p.id === 'crypto')?.money ?? 0) * 0.3);
+    out.push(M('E23', 'award', [O('next', '……', { money: -cut })], undefined));
   }
   const naming = s.sponsors.filter(x => x.namingAward && !x.allied).length;
   if (naming >= 3) { const c = ev('E22'); if (c) out.push(c); }
-  out.push(M('E16', 'award', [
+  // C3 绑定：币圈金主在场时，"等值代币"是金主的注视项（置顶+标红）
+  const cryptoWatching = s.patronId === 'crypto';
+  const e16opts: Option[] = [
     O('transfer', '当场转账 · ¥60000', { money: -60000, anger: -10, rep: 15, conscience: 10 }, {
       cost: 60000, preview: '预算 -60000 · 口碑 +15', conscienceMark: true,
       desc: '弹幕集体起立。',
     }),
     O('process', '“走流程”（6 个月）', { anger: 20, rep: -10, risk: 5 }, { desc: '获奖群名改为“讨债群”。' }),
-    O('token', '等值代币', { anger: 15, rep: -10, risk: 30 }, { desc: '三个月后价值归零。你们都对，这就是 Web3。' }),
+    O('token', cryptoWatching ? '等值代币（金主看着呢）' : '等值代币', { anger: 15, rep: -10, risk: 30 }, {
+      warn: cryptoWatching || undefined,
+      desc: cryptoWatching ? '奖杯本来就是 NFT，奖金上链很合理吧。' : '三个月后价值归零。你们都对，这就是 Web3。',
+    }),
     O('cert', '证书 + 与领导合影', { anger: 15, rep: -15, risk: 10 }, { desc: '证书编号是手写的，合影里领导在中间。' }),
-  ]));
+  ];
+  if (cryptoWatching) e16opts.unshift(e16opts.splice(2, 1)[0]); // 代币置顶
+  out.push(M('E16', 'award', e16opts));
   out.push(M('E17', 'award', [
     O('champion', '冠军队', { gov: -5, rep: 5, conscience: 5 }, { conscienceMark: true, preview: '口碑 +5 · 政商 -5', desc: '领导脸上笑，心里记账。' }),
     O('leader', '领导', { gov: 10 }, { preview: '政商 +10', desc: '通稿配图完美。选手在第三排，露出半个头。' }),
@@ -490,7 +524,7 @@ export function deckNext(s: RunState, rng: Rng, repFinal: number): Card[] {
       if (govRelated(s)) { const c = ev('E05'); return c ? [c] : []; }
       return [];
     }
-    case 'meal': s.flags.stage = 'wifi'; return stageMeal();
+    case 'meal': s.flags.stage = 'wifi'; return stageMeal(s);
     case 'wifi': s.flags.stage = 'lodge'; return stageWifi();
     case 'lodge': s.flags.stage = 'e06'; return stageLodging();
     case 'e06': { s.flags.stage = 'judges'; const c = ev('E06'); return c ? [c] : []; }

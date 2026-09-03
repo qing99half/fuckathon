@@ -12,7 +12,10 @@ const O = (id: string, label: string, effects: Option['effects'], extra?: Partia
 
 export function patronDebts(pid: string): Debt[] {
   if (pid === 'gov') return [{ id: 'patron_gov_speech', source: '区里数字经济专班', phase: 'opening', weight: 10 }];
-  if (pid === 'corp') return [{ id: 'patron_corp_list', source: '福报云 PR 部', phase: 'judge', weight: 8 }];
+  if (pid === 'corp') return [
+    { id: 'patron_corp_list', source: '福报云 PR 部', phase: 'judge', weight: 8 },
+    { id: 'patron_corp_api', source: '福报云 PR 部', phase: 'hack', weight: 7 },
+  ];
   if (pid === 'crypto') return [{ id: 'patron_crypto_chain', source: '孙割币交所', phase: 'award', weight: 10 }];
   return [];
 }
@@ -65,7 +68,7 @@ function buildDebtCard(d: Debt, s?: RunState): Card {
       return {
         id: 'DBT_GOV', phase: 'hack', cause,
         title: '领导致辞（进行时）',
-        body: '领导拿着三页纸上台了。四十分钟过去，第一页还没讲完。台下选手的电脑电量和耐心同步下降。',
+        body: '领导拿着三页纸上台了。四十分钟过去，第一页还没讲完。台下选手的电脑电量和耐心同步下降。\n通稿里"新质生产力"已出现五次——要求是三次，超发的两次是领导现场加的。',
         options: [
           O('a', '让他讲完，掌声要热烈', { anger: 8, buzz: 5, gov: 5 }, { desc: '领导很满意，说要"年年办"。' }),
           O('b', '主持人掐表救场', { gov: -15, risk: 5, anger: -3 }, { warn: true, desc: '领导的笑容凝固在第 41 分钟。' }),
@@ -81,6 +84,18 @@ function buildDebtCard(d: Debt, s?: RunState): Card {
           O('b', '婉拒', { money: -8000, gov: -10 }, { preview: '预算 -8000', desc: '对方回了一个"好的"。你仿佛听见了尾款粉碎的声音。' }),
         ],
       };
+    case 'patron_corp_api': {
+      const cut = Math.round(64000 * 0.1);
+      return {
+        id: 'DBT_CORP_API', phase: 'hack', cause,
+        title: '赛题云绑定',
+        body: '福报云 PR 部跟进赛题进度，合同第 1 条加粗标红：必须用他们家云 API。选手问为什么必须用，你说不出话。',
+        options: [
+          O('a', '坚持绑定', { anger: 8, buzz: -2 }, { desc: 'PR 部发来一面电子锦旗：《优秀合作伙伴》。' }),
+          O('b', '悄悄放开限制', { money: -cut }, { preview: `预算 -${cut}`, warn: true, desc: '对方"注意到了"。扣款通知比感谢信来得快。' }),
+        ],
+      };
+    }
     case 'patron_crypto_chain':
       return {
         id: 'DBT_CRYPTO', phase: 'award', cause,
@@ -144,7 +159,7 @@ function buildDebtCard(d: Debt, s?: RunState): Card {
       return {
         id: 'DBT_JIANLI', phase: 'judge', cause,
         title: '收货地址门',
-        body: '有选手发现报名时填的收货地址，出现在了狗东物流的营销短信里。当事人正在现场直播维权。',
+        body: '有选手发现报名时填的收货地址，出现在了狗东物流的营销短信里。当事人正在现场直播维权。\n你望向角落的"快递驿站"——当时你真以为那是个便民设施。',
         options: [
           O('a', '道歉 + 当场销毁数据 · ¥1000', { money: -1000, buzz: -3, anger: -5 }, { cost: 1000, preview: '预算 -1000', conscienceMark: true, desc: '直播标题从"维权"改成了"后续"。' }),
           O('b', '装死', { risk: L ? 5 : 10 }, { warn: true, desc: '直播标题从"维权"改成了"维权（二）"。' }),

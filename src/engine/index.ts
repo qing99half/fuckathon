@@ -84,7 +84,10 @@ export class GameEngine {
       const riskRaised = (opt.effects?.risk ?? 0) > 0;
       const isFinalCall = card.id === 'E17';
       if (riskRaised || isFinalCall) {
-        const mult = s.judges.some(j => j.streamer) ? 1.5 : 1;
+        // B2 绑定：签了 bit跳动"路演挂直播间"（非结盟）→ 评审期视同直播评委在场，翻车概率 ×1.5 常开
+        const livestream = s.judges.some(j => j.streamer)
+          || (s.phase === 'judge' && s.sponsors.some(x => x.id === 'yuzhou' && !x.allied));
+        const mult = livestream ? 1.5 : 1;
         if (this.rng.next() * 100 < s.risk * mult) {
           const e18 = getEventCard('E18');
           if (e18 && !s.firedEvents.includes('E18')) {
@@ -225,6 +228,11 @@ export class GameEngine {
       };
       s.sponsors.push(deal);
       s.debts.push(...sponsorDebts(sp, allied)); // 签约即记账，结盟记轻账
+      // B3 绑定：猪厂互娱要求 Title 挂手游名（全签才挂，结盟免这条）
+      if (sp.id === 'fangqi' && !allied) {
+        s.titleText += '·猪厂互娱手游杯';
+        out.push({ kind: 'toast', text: `赛事全名变更为：${s.titleText}` });
+      }
       const n = s.sponsors.length;
       if (n === 3 && BARRAGES.linked.sponsor_3) out.push({ kind: 'barrage', lines: BARRAGES.linked.sponsor_3 });
       if (n === 5 && BARRAGES.linked.sponsor_5) out.push({ kind: 'barrage', lines: BARRAGES.linked.sponsor_5 });
@@ -245,9 +253,20 @@ export class GameEngine {
       if (j) s.judges.push(j);
       return;
     }
-    if (cardId === 'VENUE') { s.venueId = optionId; s.debts.push(...venueDebts(optionId)); }
+    if (cardId === 'VENUE') {
+      s.venueId = optionId;
+      s.debts.push(...venueDebts(optionId));
+      if (optionId === 'park' && s.patronId === 'gov') {
+        out.push({ kind: 'toast', text: '场地券兑付成功：你免费用了本来就不要钱的场地。' });
+      }
+    }
     if (cardId === 'MEAL') {
       s.mealTier = optionId === 'meal_15' ? 15 : optionId === 'meal_30' ? 30 : 60;
+      return;
+    }
+    if (cardId === 'MEAL_PFF') {
+      s.mealTier = optionId === 'pff_plus' ? 30 : 15; // 丑团锁定卡：升级档按 30 算，其余按生命体征维持餐
+      s.flags.pffLocked = true;
       return;
     }
     if (cardId === 'WIFI') { s.wifiGood = optionId === 'wifi_good'; return; }
@@ -381,6 +400,11 @@ export class GameEngine {
     if (cardId === 'E19') return optionId === 'b' ? 'bloat_cut' : 'bloat';
     if (cardId === 'E22' && optionId === 'a') return 'inflation';
     if (/^D\d+$/.test(cardId) && optionId === 'hard') return 'hard_carry';
+    // C4/C6：强制兑现与赞助商签约的联动弹幕
+    if (cardId === 'DBT_XUEWANG' && optionId === 'a') return 'debt_xuewang';
+    if (cardId === 'SP_maomi' && optionId === 'sign') return 'sign_maomi';
+    if (cardId === 'SP_jixue' && optionId === 'sign') return 'sign_jixue';
+    if (cardId === 'SP_english' && optionId === 'sign') return 'sign_english';
     return null;
   }
 
