@@ -8,6 +8,7 @@ import {
 } from './data';
 import { genTeams, initialBoard } from './judge';
 import { matchEnding } from './ending';
+import { drawDebts } from './debts';
 
 const C = (id: string, phase: Card['phase'], title: string, body: string, options: Option[], footnote?: string): Card =>
   ({ id, phase, title, body, options, footnote });
@@ -48,9 +49,9 @@ function sponsorCard(s: RunState, sp: Sponsor): Card {
     O('refuse', '婉拒', { buzz: -2 }, { preview: '声量 -2', desc: '“我们再考虑考虑。”——圈子里会传你难合作。' }),
   ];
   if (s.conscience >= 40) {
-    opts.splice(1, 0, O('ally', '结盟式谈判（金额六折，条件全免）', {
+    opts.splice(1, 0, O('ally', '结盟式谈判（金额六折，代价减半）', {
       money: Math.round(amt * 0.6 / 1000) * 1000, chaos: 1, expect: 2, conscience: 10,
-    }, { conscienceMark: true, preview: `预算 +${Math.round(amt * 0.6 / 1000) / 10}万 · 混乱 +1`, desc: '把条件一条条划掉。对方居然笑了。\n结盟赞助商会记住你：真出事时，他们会捞你一次。' }));
+    }, { conscienceMark: true, preview: `预算 +${Math.round(amt * 0.6 / 1000) / 10}万 · 混乱 +1`, desc: '把条件一条条划掉。对方居然笑了。\n账还是会来，只是来得轻一点。' }));
   }
   return C(`SP_${sp.id}`, 'prep', `赞助商上门 · ${sp.name}`, `${sp.body}\n\n小字：${sp.footnote}`, opts);
 }
@@ -495,8 +496,8 @@ export function deckNext(s: RunState, rng: Rng, repFinal: number): Card[] {
     case 'e06': { s.flags.stage = 'judges'; const c = ev('E06'); return c ? [c] : []; }
     case 'judges': s.flags.stage = 'recap'; return stageJudgeBuild(s, rng);
     case 'recap': s.flags.stage = 'hackopen'; return stagePrepRecap(s);
-    case 'hackopen': s.flags.stage = 'hackevents'; return stageHackOpen(s, rng);
-    case 'hackevents': s.flags.stage = 'deadline'; return stageHackEvents(s, rng);
+    case 'hackopen': s.flags.stage = 'hackevents'; return [...drawDebts(s, rng, 'opening', 1), ...stageHackOpen(s, rng)];
+    case 'hackevents': s.flags.stage = 'deadline'; return [...drawDebts(s, rng, 'hack', 2), ...stageHackEvents(s, rng)];
     case 'deadline': s.flags.stage = 'jintro'; return stageDeadline();
     case 'jintro': {
       s.flags.stage = 'demos';
@@ -512,16 +513,17 @@ export function deckNext(s: RunState, rng: Rng, repFinal: number): Card[] {
       // D9 名单危机抢救窗口：怨气≥85 + 内定痕迹≥2
       const traces = [s.grifterAction === 'allied', s.strongTeamHandled === 'bought',
         s.sponsors.some(x => x.judgeSeat && !x.allied), Boolean(s.flags.bribed)].filter(Boolean).length;
+      const judgeDebts = drawDebts(s, rng, 'judge', 2);
       if (s.anger >= 85 && traces >= 2 && !s.flags.fired_D9) {
         s.flags.fired_D9 = true;
         const d9 = buildDeathCard(DEATHS.find(d => d.id === 'D9')!);
         const board0 = initialBoard(s.teams, s.judges, rng);
         s.flags.__board = board0.map(r => ({ name: r.team.name, score: r.score, id: r.team.id })) as unknown as string;
-        return [d9, ...stageJudgeIntro(s)];
+        return [d9, ...judgeDebts, ...stageJudgeIntro(s)];
       }
       const board = initialBoard(s.teams, s.judges, rng);
       s.flags.__board = board.map(r => ({ name: r.team.name, score: r.score, id: r.team.id })) as unknown as string;
-      return stageJudgeIntro(s);
+      return [...judgeDebts, ...stageJudgeIntro(s)];
     }
     case 'demos': s.flags.stage = 'e13'; return stageDemos(s, rng);
     case 'e13': { s.flags.stage = 'e14'; const c = ev('E13'); return c ? [c] : []; }
@@ -548,7 +550,7 @@ export function deckNext(s: RunState, rng: Rng, repFinal: number): Card[] {
       return stageRigTable(s, board.slice(0, 3));
     }
     case 'e20wait': s.flags.stage = 'award'; return []; // E20 由 choose() 在选 rig_rigged 时插入
-    case 'award': s.flags.stage = 'settle'; return stageAward(s, rng);
+    case 'award': s.flags.stage = 'settle'; return [...drawDebts(s, rng, 'award', 1), ...stageAward(s, rng)];
     case 'settle': s.flags.stage = 'done'; return stageSettle(s, repFinal);
     default: return [];
   }

@@ -55,6 +55,17 @@ export interface Team {
   isGrifter?: boolean;
 }
 
+// ---------- 契约账簿：前期选择 → 后期强制兑现卡 ----------
+export type DebtPhase = 'opening' | 'hack' | 'judge' | 'award';
+
+export interface Debt {
+  id: string;           // 模板 id，如 sp_suyun_api
+  source: string;       // 溯源名：'鹅厂云' / '区里数字经济专班' / '离谱 Title'
+  phase: DebtPhase;     // 兑现窗口
+  weight: number;       // 抽卡权重
+  light?: boolean;      // 结盟轻账：惩罚减半、不翻脸
+}
+
 export interface RunState {
   seed: string;
   rngState: number;
@@ -73,6 +84,7 @@ export interface RunState {
   rigChoice: '' | 'fair' | 'rigged' | 'water';
   rigTarget?: string;
   awardMode: string;
+  debts: Debt[];           // 契约账簿：待兑现的强制卡
   exposed: boolean; apologized: boolean;
   strongTeamHandled: string; // noted / ignored / bought
   grifterAction: string;     // '' / expelled / ignored / allied

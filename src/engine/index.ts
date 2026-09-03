@@ -5,6 +5,7 @@ import { applyEffects, applyFlags } from './effects';
 import { deckNext, buildE20, sponsorAmt, govRelated, DEATHS, buildDeathCard, buildE24 } from './deck';
 import { matchEnding, repFinalOf } from './ending';
 import { SPONSORS, PATRONS, TITLE_TIERS, JUDGES, BARRAGES, HYPES, getEventCard, eventToCard, mainCopy } from './data';
+import { patronDebts, sponsorDebts, venueDebts, titleDebts, rigFlipCard } from './debts';
 
 export class GameEngine {
   state: RunState;
@@ -22,6 +23,7 @@ export class GameEngine {
       sponsors: [], judges: [], judgeSlots: 0, teams: [],
       rigChoice: '', awardMode: '', exposed: false, apologized: false,
       strongTeamHandled: '', grifterAction: '',
+      debts: [],
       log: [], queue: [], firedEvents: [],
       flags: { stage: 'intro' },
     };
@@ -192,6 +194,7 @@ export class GameEngine {
         s.titleTier = tier;
         s.flags.crowd = t.crowd;
         this.fx(out, { buzz: t.buzz, expect: t.expect });
+        s.debts.push(...titleDebts(tier));
       }
       return;
     }
@@ -201,6 +204,7 @@ export class GameEngine {
       const p = PATRONS.find(x => x.id === pid);
       if (p) this.fx(out, { money: p.money, buzz: p.buzz, gov: p.gov });
       if (pid === 'crypto') s.flags.cryptoTail = true;
+      s.debts.push(...patronDebts(pid));
       return;
     }
     if (cardId.startsWith('SP_')) {
@@ -220,6 +224,7 @@ export class GameEngine {
         allied,
       };
       s.sponsors.push(deal);
+      s.debts.push(...sponsorDebts(sp, allied)); // 签约即记账，结盟记轻账
       const n = s.sponsors.length;
       if (n === 3 && BARRAGES.linked.sponsor_3) out.push({ kind: 'barrage', lines: BARRAGES.linked.sponsor_3 });
       if (n === 5 && BARRAGES.linked.sponsor_5) out.push({ kind: 'barrage', lines: BARRAGES.linked.sponsor_5 });
@@ -240,7 +245,7 @@ export class GameEngine {
       if (j) s.judges.push(j);
       return;
     }
-    if (cardId === 'VENUE') s.venueId = optionId;
+    if (cardId === 'VENUE') { s.venueId = optionId; s.debts.push(...venueDebts(optionId)); }
     if (cardId === 'MEAL') {
       s.mealTier = optionId === 'meal_15' ? 15 : optionId === 'meal_30' ? 30 : 60;
       return;
@@ -280,6 +285,7 @@ export class GameEngine {
         } else {
           s.rigTarget = debts[0]?.id ?? 'grifter';
         }
+        s.queue.unshift(rigFlipCard()); // 内定的账：当场兑现一次翻车（排在债主卡之前）
       }
       if (optionId === 'rig_water') s.flags.awardInflation = true;
       return;
