@@ -206,12 +206,15 @@ export class GameEngine {
     if (cardId.startsWith('SP_')) {
       const sp = SPONSORS.find(x => `SP_${x.id}` === cardId);
       if (!sp) return;
-      if (optionId === 'refuse') return;
+      if (optionId === 'refuse') {
+        s.flags.refused = Number(s.flags.refused ?? 0) + 1; // 连拒 3 家：第 3 波不再上门
+        return;
+      }
       const amt = sponsorAmt(s, sp);
       const allied = optionId === 'ally';
       const deal = {
-        id: sp.id, name: sp.name, money: allied ? Math.round(amt / 2 / 1000) * 1000 : amt,
-        chaos: allied ? 0 : sp.chaos, demands: [],
+        id: sp.id, name: sp.name, money: allied ? Math.round(amt * 0.6 / 1000) * 1000 : amt,
+        chaos: allied ? 1 : sp.chaos, demands: [],
         judgeSeat: allied ? false : sp.judgeSeat,
         namingAward: allied ? false : sp.namingAward,
         allied,
@@ -223,6 +226,7 @@ export class GameEngine {
       return;
     }
     if (cardId.startsWith('JD_')) {
+      if (optionId === 'judge_none') { s.flags.emptySeats = Number(s.flags.emptySeats ?? 0) + 1; return; }
       const found = JUDGES.find(x => `judge_${x.id}` === optionId);
       let j = found && !s.judges.some(x => x.id === found.id) ? found : undefined; // 防重复：换第一个未被选的可用人
       if (!j) {

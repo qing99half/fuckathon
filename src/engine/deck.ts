@@ -35,7 +35,7 @@ export function sponsorAmt(s: RunState, sp: Sponsor): number {
   if (s.flags.sponsorCut) amt *= Number(s.flags.sponsorCut);
   const h = hypeOf(s);
   if (h?.sponsorEase === 'hard') amt *= 0.8;
-  if (s.rep < 25) amt *= 0.8; // 黑红状态：赞助金额打 8 折
+  if (s.rep < 25) amt *= 0.7; // 黑红状态：赞助金额打 7 折（黑红就该更疼）
   return Math.round(amt / 1000) * 1000;
 }
 
@@ -45,12 +45,12 @@ function sponsorCard(s: RunState, sp: Sponsor): Card {
     O('sign', `签！+¥${amt.toLocaleString()}`, {
       money: amt, buzz: 5, gov: 5, chaos: sp.chaos,
     }, { preview: `预算 +${amt / 10000}万 · 混乱 +${sp.chaos}`, desc: sp.body }),
-    O('refuse', '婉拒', {}, { desc: '“我们再考虑考虑。”' }),
+    O('refuse', '婉拒', { buzz: -2 }, { preview: '声量 -2', desc: '“我们再考虑考虑。”——圈子里会传你难合作。' }),
   ];
   if (s.conscience >= 40) {
-    opts.splice(1, 0, O('ally', '结盟式谈判（金额减半，条件全免）', {
-      money: Math.round(amt / 2 / 1000) * 1000, conscience: 10,
-    }, { conscienceMark: true, desc: '把条件一条条划掉。对方居然笑了。' }));
+    opts.splice(1, 0, O('ally', '结盟式谈判（金额六折，条件全免）', {
+      money: Math.round(amt * 0.6 / 1000) * 1000, chaos: 1, expect: 2, conscience: 10,
+    }, { conscienceMark: true, preview: `预算 +${Math.round(amt * 0.6 / 1000) / 10}万 · 混乱 +1`, desc: '把条件一条条划掉。对方居然笑了。\n结盟赞助商会记住你：真出事时，他们会捞你一次。' }));
   }
   return C(`SP_${sp.id}`, 'prep', `赞助商上门 · ${sp.name}`, `${sp.body}\n\n小字：${sp.footnote}`, opts);
 }
@@ -114,14 +114,16 @@ function stageConfirm(s: RunState): Card[] {
 
 function stageSponsorWave(s: RunState, rng: Rng, wave: number): Card[] {
   let pool: Sponsor[] = [];
-  if (wave === 1) pool = SPONSORS.filter(x => x.wave === 1);
+  if (wave === 1) pool = rng.shuffle(SPONSORS.filter(x => x.wave === 1)).slice(0, 2);
   if (wave === 2) {
-    const h = hypeOf(s);
-    const n = (h && h.heat >= 85) ? 4 : 3;
-    pool = rng.shuffle(SPONSORS.filter(x => x.wave === 2)).slice(0, n);
+    // 声量门控：不够热，第二波根本不来
+    if (s.buzz < 40) return [];
+    pool = rng.shuffle(SPONSORS.filter(x => x.wave === 2)).slice(0, 2);
   }
   if (wave === 3) {
-    if (s.buzz < 50) return [];
+    // 第三波只闻大钱味：声量爆表或已经够乱；连拒 3 家圈内传开，不来了
+    if (!(s.buzz >= 70 || s.chaos >= 6)) return [];
+    if (Number(s.flags.refused ?? 0) >= 3) return [];
     pool = SPONSORS.filter(x => x.wave === 3);
   }
   if (!pool.length) return [];
@@ -207,14 +209,19 @@ function stageJudgeBuild(s: RunState, rng: Rng): Card[] {
     for (const j of cand) offered.add(j.id);
     seatNo++;
     // 评委出场费：名人收费，情怀/凑数免费；预算不足置灰
-    cards.push(M('JD', 'prep', cand.map(j => {
+    const opts = cand.map(j => {
       const fee = j.fee ?? 0;
       return O(`judge_${j.id}`, fee ? `${j.name}｜${j.tag} · ¥${fee.toLocaleString()}` : `${j.name}｜${j.tag}`,
         fee ? { money: -fee } : {},
         fee
           ? { cost: fee, preview: `出场费 -${fee}`, desc: j.flavor }
           : { desc: `${j.flavor}\n（不要钱，要情怀）` });
-    }), { n: seatNo }));
+    });
+    // 全员收费时必须留一条免费出路，否则破产局卡死在评委席
+    if (cand.every(j => (j.fee ?? 0) > 0)) {
+      opts.push(O('judge_none', '这席先空着', {}, { desc: '评委少一个，公正多一分。钱也是。' }));
+    }
+    cards.push(M('JD', 'prep', opts, { n: seatNo }));
     cards[cards.length - 1].id = `JD_${seatNo}`;
   }
   return cards;
@@ -434,16 +441,17 @@ export function buildDeathCard(def: DeathDef): Card {
   };
 }
 
-/** 热搜第一强制事件（risk≥80） */
+/** 热搜第一强制事件（risk≥80）；有结盟赞助商 → 多出"联名担保"选项 */
 export function buildE24(): Card {
   const c = mainCopy('E24');
+  const options: Card['options'] = [
+    { id: 'apologize', label: '发道歉声明+公关 · ¥20000', cost: 20000, effects: { money: -20000, risk: -30, conscience: 10 }, preview: '预算 -20000', conscienceMark: true },
+    { id: 'dead', label: '装死', effects: { rep: -30 }, warn: true, desc: '评论区会替你发言的。' },
+    { id: 'lawyer', label: '律师函警告', effects: {}, warn: true, desc: '50% 翻盘，50% 被锤得更死。' },
+  ];
   return {
     id: 'E24', phase: 'any' as Card['phase'], title: c.title, body: c.body, cause: '风险值爆表的后果',
-    options: [
-      { id: 'apologize', label: '发道歉声明+公关 · ¥20000', cost: 20000, effects: { money: -20000, risk: -30, conscience: 10 }, preview: '预算 -20000', conscienceMark: true },
-      { id: 'dead', label: '装死', effects: { rep: -30 }, warn: true, desc: '评论区会替你发言的。' },
-      { id: 'lawyer', label: '律师函警告', effects: {}, warn: true, desc: '50% 翻盘，50% 被锤得更死。' },
-    ],
+    options,
   };
 }
 
