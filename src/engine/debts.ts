@@ -81,7 +81,7 @@ function buildDebtCard(d: Debt, s?: RunState): Card {
         body: '福报云 PR 部发来一份"建议获奖名单"，附件 12MB。名单上全是自家生态的项目，懂？',
         options: [
           O('a', '按名单来', { risk: 10, conscience: -10 }, { warn: true, desc: '公平这两个字，先从字典里统筹掉。' }),
-          O('b', '婉拒', { money: -8000, gov: -10 }, { preview: '预算 -8000', desc: '对方回了一个"好的"。你仿佛听见了尾款粉碎的声音。' }),
+          O('b', '婉拒', { money: -8000, gov: -10, risk: -5 }, { preview: '预算 -8000', desc: '对方回了一个"好的"。你仿佛听见了尾款粉碎的声音。' }),
         ],
       };
     case 'patron_corp_api': {
@@ -92,7 +92,7 @@ function buildDebtCard(d: Debt, s?: RunState): Card {
         body: '福报云 PR 部跟进赛题进度，合同第 1 条加粗标红：必须用他们家云 API。选手问为什么必须用，你说不出话。',
         options: [
           O('a', '坚持绑定', { anger: 8, buzz: -2 }, { desc: 'PR 部发来一面电子锦旗：《优秀合作伙伴》。' }),
-          O('b', '悄悄放开限制', { money: -cut }, { preview: `预算 -${cut}`, warn: true, desc: '对方"注意到了"。扣款通知比感谢信来得快。' }),
+          O('b', '悄悄放开限制', { money: -cut, risk: -5 }, { preview: `预算 -${cut}`, warn: true, desc: '对方"注意到了"。扣款通知比感谢信来得快。' }),
         ],
       };
     }
@@ -116,7 +116,7 @@ function buildDebtCard(d: Debt, s?: RunState): Card {
           O('a', '坚持绑定', { anger: L ? 5 : 10, buzz: -3 }, { desc: '市场总监发来大拇指表情。' }),
           L
             ? O('b', '悄悄放开限制', { buzz: -3 }, { desc: '结盟方睁一只眼闭一只眼。' })
-            : O('b', '悄悄放开限制', { money: -cut }, { preview: `预算 -${cut}`, warn: true, desc: '总监把大拇指收回去了。' }),
+            : O('b', '悄悄放开限制', { money: -cut, risk: -5 }, { preview: `预算 -${cut}`, warn: true, desc: '总监把大拇指收回去了。' }),
         ],
       };
     }
@@ -139,7 +139,7 @@ function buildDebtCard(d: Debt, s?: RunState): Card {
         title: '满 25 减 2',
         body: '丑团外卖的"独家供餐"落地了：全场满 25 减 2。选手算账发现比原价还贵 1 块 5，截图已经 200 转。',
         options: [
-          O('a', '自掏腰包补差价 · ¥2000', { money: -2000, anger: -5 }, { cost: 2000, preview: '预算 -2000', conscienceMark: true, desc: '选手第一次觉得主办方像个人。' }),
+          O('a', '自掏腰包补差价 · ¥2000', { money: -2000, anger: -5, risk: -2 }, { cost: 2000, preview: '预算 -2000', conscienceMark: true, desc: '选手第一次觉得主办方像个人。' }),
           O('b', '装死', { anger: L ? 4 : 8, buzz: -5 }, { desc: '"满 25 减 2"成了本届赛事的吉祥物。' }),
         ],
       };
@@ -161,7 +161,7 @@ function buildDebtCard(d: Debt, s?: RunState): Card {
         title: '收货地址门',
         body: '有选手发现报名时填的收货地址，出现在了狗东物流的营销短信里。当事人正在现场直播维权。\n你望向角落的"快递驿站"——当时你真以为那是个便民设施。',
         options: [
-          O('a', '道歉 + 当场销毁数据 · ¥1000', { money: -1000, buzz: -3, anger: -5 }, { cost: 1000, preview: '预算 -1000', conscienceMark: true, desc: '直播标题从"维权"改成了"后续"。' }),
+          O('a', '道歉 + 当场销毁数据 · ¥1000', { money: -1000, buzz: -3, anger: -5, risk: -5 }, { cost: 1000, preview: '预算 -1000', conscienceMark: true, desc: '直播标题从"维权"改成了"后续"。' }),
           O('b', '装死', { risk: L ? 5 : 10 }, { warn: true, desc: '直播标题从"维权"改成了"维权（二）"。' }),
         ],
       };

@@ -388,6 +388,11 @@ function stageE20(s: RunState): Card[] {
 
 function stageAward(s: RunState, rng: Rng): Card[] {
   const out: Card[] = [];
+  // D3 扒皮抢救窗口·第三清算点（颁奖前夜：声量≥80 且口碑≤30）
+  if (s.buzz >= 80 && s.rep <= 30 && !s.flags.fired_D3) {
+    s.flags.fired_D3 = true;
+    out.push(buildDeathCard(DEATHS.find(d => d.id === 'D3')!));
+  }
   // D2 孙割跑路抢救窗口：币圈金主 + 混乱≥5（颁奖前清算）
   if (s.patronId === 'crypto' && s.chaos >= 5 && !s.flags.fired_D2) {
     s.flags.fired_D2 = true;
@@ -544,6 +549,12 @@ export function deckNext(s: RunState, rng: Rng, repFinal: number): Card[] {
         s.teams = s.teams.filter(t => !drop.has(t.id));
         s.flags.withdrawalWave = true;
       }
+      // D3 扒皮抢救窗口·第二清算点（声量≥80 且口碑≤30；筹备收官没清算的，评审开场再清算一次）
+      const preDeath: Card[] = [];
+      if (s.buzz >= 80 && s.rep <= 30 && !s.flags.fired_D3) {
+        s.flags.fired_D3 = true;
+        preDeath.push(buildDeathCard(DEATHS.find(d => d.id === 'D3')!));
+      }
       // D9 名单危机抢救窗口：怨气≥85 + 内定痕迹≥2
       const traces = [s.grifterAction === 'allied', s.strongTeamHandled === 'bought',
         s.sponsors.some(x => x.judgeSeat && !x.allied), Boolean(s.flags.bribed)].filter(Boolean).length;
@@ -553,11 +564,11 @@ export function deckNext(s: RunState, rng: Rng, repFinal: number): Card[] {
         const d9 = buildDeathCard(DEATHS.find(d => d.id === 'D9')!);
         const board0 = initialBoard(s.teams, s.judges, rng);
         s.flags.__board = board0.map(r => ({ name: r.team.name, score: r.score, id: r.team.id })) as unknown as string;
-        return [d9, ...judgeDebts, ...stageJudgeIntro(s)];
+        return [...preDeath, d9, ...judgeDebts, ...stageJudgeIntro(s)];
       }
       const board = initialBoard(s.teams, s.judges, rng);
       s.flags.__board = board.map(r => ({ name: r.team.name, score: r.score, id: r.team.id })) as unknown as string;
-      return [...judgeDebts, ...stageJudgeIntro(s)];
+      return [...preDeath, ...judgeDebts, ...stageJudgeIntro(s)];
     }
     case 'demos': s.flags.stage = 'e13'; return stageDemos(s, rng);
     case 'e13': { s.flags.stage = 'e14'; const c = ev('E13'); return c ? [c] : []; }

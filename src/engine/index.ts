@@ -78,12 +78,25 @@ export class GameEngine {
       out.push({ kind: 'barrage', lines });
     }
 
-    // 5. 翻车检定：只在本选项提升了翻车风险、或颁奖终判（E17）时触发
+    // 4.5 风险感知提示（不显示数字，只给信号：25/50/75 各弹一次）
+    for (const th of [25, 50, 75]) {
+      if (s.risk >= th && !s.flags[`risk_tip_${th}`]) {
+        s.flags[`risk_tip_${th}`] = true;
+        const text = th === 25
+          ? '你注意到台下有个记者在拨弄录音笔。'
+          : th === 50
+            ? '弹幕飘过一条："这比赛不会有黑幕吧。"很快又刷走了。'
+            : '你闻到一股糊味。不是盒饭，是你自己。';
+        out.push({ kind: 'toast', text });
+      }
+    }
+
+    // 5. 翻车检定：risk≥25 才进入检定池；只在本选项提升了翻车风险、或颁奖终判（E17）时触发
     //    p = risk/100（直播评委在场 ×1.5）——概率与行为强相关
     if (!s.exposed && card.id !== 'E18' && card.phase !== 'settle' && card.phase !== 'ending' && card.phase !== 'intro') {
       const riskRaised = (opt.effects?.risk ?? 0) > 0;
       const isFinalCall = card.id === 'E17';
-      if (riskRaised || isFinalCall) {
+      if ((riskRaised && s.risk >= 25) || isFinalCall) {
         // B2 绑定：签了 bit跳动"路演挂直播间"（非结盟）→ 评审期视同直播评委在场，翻车概率 ×1.5 常开
         const livestream = s.judges.some(j => j.streamer)
           || (s.phase === 'judge' && s.sponsors.some(x => x.id === 'yuzhou' && !x.allied));

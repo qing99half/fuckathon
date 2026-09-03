@@ -131,7 +131,7 @@ if (mode === 'all' || mode === 'scripts') {
     // D2 被孙割割了：crypto 金主 + 混乱≥5（全签赞助）
     { target: 'die_sunge', fb: 'first', script: { 'PATRON': 'patron_crypto', 'SP_*': 'sign', 'E08': 'a', 'E13': 'a', 'E15': 'a', 'E21': 'a', 'W01': 'a', 'RIG': 'rig_fair', 'E16': 'transfer', 'E17': 'champion', 'D2': 'hard' } },
     // D3 认知偏差了：热度≥80 且 口碑≤30（crypto35+离谱40+E02c8=83；口碑 50-3-5-20=22，E18 需 risk 检定触发）
-    { target: 'die_cognition', fb: 'first', script: { 'PATRON': 'patron_crypto', 'TITLEPICK': 'title_3', 'SP_*': 'refuse', 'E01': 'c', 'E02': 'c', 'E03': 'a', 'E04': 'c', 'E18': 'b', 'D3': 'hard' } },
+    { target: 'die_cognition', fb: 'first', script: { 'PATRON': 'patron_crypto', 'TITLEPICK': 'title_3', 'SP_*': 'sign', 'E01': 'c', 'E02': 'c', 'E03': 'a', 'E04': 'c', 'E12': 'c', 'E21': 'b', 'E18': 'b', 'D3': 'hard' } },
     // D4 跑路了兄弟：压线 69→E07-c +30 一步到位 ≥90（20餐+15住+5园+5E02b+10E04c+5E06b=60，+30=90）
     { target: 'die_runaway', fb: 'first', script: { 'PATRON': 'patron_corp', 'SP_*': 'sign', 'VENUE': 'park', 'MEAL': 'meal_15', 'LODGE': 'lodge_none', 'E02': 'b', 'E04': 'c', 'E06': 'b', 'E07': 'c', 'E19': 'a', 'E18': 'b', 'W01': 'b', 'D4': 'hard', 'E21': 'a' } },
     // D5 我记得华莱士没赞助啊：15 元盒饭 + 35% 发作
