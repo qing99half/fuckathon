@@ -121,11 +121,15 @@ function buildDebtCard(d: Debt, s?: RunState): Card {
       };
     }
     case 'sp_seat_suyun':
-    case 'sp_seat_yuzhou':
+    case 'sp_seat_yuzhou': {
+      // 内定对象 = 该赞助商的关系队（buildTeams 在 jintro 已生成，debtOf 标记归属）
+      const spId = d.id.replace('sp_seat_', '');
+      const ti = s?.teams.findIndex(t => t.debtOf === spId) ?? -1;
+      const teamRef = s && ti >= 0 ? `${ti + 1} 号队「${s.teams[ti].name}」` : '那支关系队';
       return {
         id: `DBT_SEAT_${d.id}`, phase: 'judge', cause,
         title: '"关照一下"',
-        body: `${d.source}的评委把你拉到一边："7 号队是我们生态的，提问环节，你懂的。"`,
+        body: `${d.source}的评委把你拉到一边："${teamRef}是我们生态的，提问环节，你懂的。"`,
         options: [
           O('a', '安排', { risk: L ? 4 : 8, conscience: -8 }, { warn: true, desc: '公平又往后挪了一位。' }),
           L
@@ -133,6 +137,7 @@ function buildDebtCard(d: Debt, s?: RunState): Card {
             : O('b', '拒绝', { risk: 6 }, { desc: '对方冷笑："尾款的事，再说。"' }),
         ],
       };
+    }
     case 'sp_pff_meal':
       return {
         id: 'DBT_PFF', phase: 'hack', cause,

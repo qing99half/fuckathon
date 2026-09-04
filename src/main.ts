@@ -162,22 +162,26 @@ function startGame() {
     stage.appendChild(debugEl);
   }
 
-  // rAF 驱动弹幕与像素场景
+  // rAF 驱动弹幕与像素场景（rAF 先排期 + 异常兜底：任何一帧报错都不许杀死循环）
   let last = performance.now();
   let probeFrames = 0, probeDt = 0;
   const loop = (now: number) => {
+    requestAnimationFrame(loop);
     const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
     probeFrames++; probeDt += dt;
-    if (engine) {
+    if (!engine) return;
+    try {
       barrage?.tick(dt, engine.state.phase === 'hack' || engine.state.phase === 'judge', engine.state.anger, engine.state.phase);
       scene?.tick(dt, engine.state.anger);
-      if (debugEl) {
-        const s = engine.state;
-        debugEl.textContent = `seed ${s.seed}\nstage ${s.flags.stage}\ncard ${engine.currentCard()?.id ?? '-'}\nanger ${s.anger} risk ${s.risk}\nconsc ${s.conscience} expect ${s.expect}\nqueue ${s.queue.length}\nprobe frames=${probeFrames} dt=${probeDt.toFixed(1)} alive=${document.querySelectorAll('.barrage-item').length}`;
-      }
+    } catch (err) {
+      console.error('[frame] tick error (loop kept alive):', err);
+      if (debugEl) debugEl.textContent = `TICK ERROR: ${String(err)}`;
     }
-    requestAnimationFrame(loop);
+    if (debugEl) {
+      const s = engine.state;
+      debugEl.textContent = `seed ${s.seed}\nstage ${s.flags.stage}\ncard ${engine.currentCard()?.id ?? '-'}\nanger ${s.anger} risk ${s.risk}\nconsc ${s.conscience} expect ${s.expect}\nqueue ${s.queue.length}\nprobe frames=${probeFrames} dt=${probeDt.toFixed(1)} alive=${document.querySelectorAll('.barrage-item').length}`;
+    }
   };
   requestAnimationFrame(loop);
 

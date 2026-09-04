@@ -57,18 +57,18 @@ export class Barrage {
     }
   }
 
-  /** 每帧驱动 */
+  /** 每帧驱动。active=false 时不再发射新弹，但存量继续滚出屏幕（阶段切换不清屏、不定格） */
   tick(dt: number, active: boolean, anger = 0, phase = '') {
-    if (!active) return;
     const W = this.box.clientWidth || 400;
 
-    // 1. 推进 & 回收
+    // 1. 推进 & 回收（无论是否 active 都执行，弹幕自然滚尽）
     for (const it of this.pool) {
       if (!it.busy) continue;
       it.x -= it.v * dt;
       if (it.x + it.w < -8) { it.busy = false; it.el.style.display = 'none'; }
       else it.el.style.transform = `translate3d(${it.x}px,0,0)`;
     }
+    if (!active) return;
 
     // 2. 发射：联动 > 事件 > 氛围补弹
     const target = phase === 'judge' ? 14 : 20;
